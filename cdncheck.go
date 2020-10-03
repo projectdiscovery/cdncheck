@@ -12,18 +12,32 @@ import (
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
+	Data   map[string]struct{}
 	ranger cidranger.Ranger
 }
 
-var scrapers = map[string]scraperFunc{
+var defaultScrapers = map[string]scraperFunc{
 	"akamai":     scrapeAkamai,
 	"cloudflare": scrapeCloudflare,
 	"incapsula":  scrapeIncapsula,
 	"sucuri":     scrapeSucuri,
 }
 
+var cachedScrapers = map[string]scraperFunc{
+	"projectdiscovery": scrapeProjectDiscovery,
+}
+
 // New creates a new firewall IP checking client.
 func New() (*Client, error) {
+	return new(false)
+}
+
+// NewWithCache creates a new firewall IP with cached data from project discovery (faster)
+func NewWithCache() (*Client, error) {
+	return new(true)
+}
+
+func new(cache bool) (*Client, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			MaxIdleConns:        100,
@@ -37,21 +51,26 @@ func New() (*Client, error) {
 	}
 	client := &Client{}
 
-	dups := make(map[string]struct{})
+	var scrapers map[string]scraperFunc
+	if cache {
+		scrapers = cachedScrapers
+	} else {
+		scrapers = defaultScrapers
+	}
+
+	client.Data = make(map[string]struct{})
 	for _, scraper := range scrapers {
 		cidrs, err := scraper(httpClient)
 		if err != nil {
 			return nil, err
 		}
 		for _, cidr := range cidrs {
-			if _, ok := dups[cidr]; !ok {
-				dups[cidr] = struct{}{}
-			}
+			client.Data[cidr] = struct{}{}
 		}
 	}
 
 	ranger := cidranger.NewPCTrieRanger()
-	for cidr := range dups {
+	for cidr := range client.Data {
 		_, network, err := net.ParseCIDR(cidr)
 		if err != nil {
 			continue
