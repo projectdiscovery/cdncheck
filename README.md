@@ -13,7 +13,9 @@ import (
 )
 
 func main() {
-    client, err := cdncheck.New()
+    // uses projectdiscovery endpoint with cached data to avoid ip ban
+    // Use cdncheck.New() if you want to scrape each endpoint (don't do it too often or your ip can be blocked)
+    client, err := cdncheck.NewWithCache()
     if err != nil {
         log.Fatal(err)
     }
