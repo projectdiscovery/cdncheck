@@ -29,6 +29,24 @@ func scrapeCloudflare(httpClient *http.Client) ([]string, error) {
 	return cidrs, nil
 }
 
+// scrapeCloudFront scrapes CloudFront firewall's CIDR ranges from their API
+func scrapeCloudFront(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
 // scrapeIncapsula scrapes incapsula firewall's CIDR ranges from their API
 func scrapeIncapsula(httpClient *http.Client) ([]string, error) {
 	req, err := http.NewRequest(http.MethodPost, "https://my.incapsula.com/api/integration/v1/ips", strings.NewReader("resp_format=text"))

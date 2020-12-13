@@ -26,6 +26,10 @@ func TestScrapeRanges(t *testing.T) {
 		_, err := scrapeCloudflare(httpClient)
 		require.Nil(t, err, "Could not scrape cloudflare")
 	})
+	t.Run("cloudfront", func(t *testing.T) {
+		_, err := scrapeCloudFront(httpClient)
+		require.Nil(t, err, "Could not scrape cloudfront")
+	})
 	t.Run("incapsula", func(t *testing.T) {
 		_, err := scrapeIncapsula(httpClient)
 		require.Nil(t, err, "Could not scrape incapsula")
