@@ -38,6 +38,10 @@ func TestScrapeRanges(t *testing.T) {
 		_, err := scrapeAkamai(httpClient)
 		require.Nil(t, err, "Could not scrape akamai")
 	})
+	t.Run("azure", func(t *testing.T) {
+		_, err := scrapeAzure(httpClient)
+		require.Nil(t, err, "Could not scrape azure")
+	})
 	t.Run("sucuri", func(t *testing.T) {
 		_, err := scrapeSucuri(httpClient)
 		require.Nil(t, err, "Could not scrape sucuri")

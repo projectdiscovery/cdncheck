@@ -89,6 +89,24 @@ func scrapeAkamai(httpClient *http.Client) ([]string, error) {
 	return cidrs, nil
 }
 
+// scrapeAzure scrapes Microsoft Azure firewall's CIDR ranges from their datacenter
+func scrapeAzure(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://download.microsoft.com/download/0/1/8/018E208D-54F8-44CD-AA26-CD7BC9524A8C/PublicIPs_20200824.xml")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
 // scrapeSucuri scrapes sucuri firewall's CIDR ranges from ipinfo
 func scrapeSucuri(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://ipinfo.io/AS30148")
