@@ -21,6 +21,7 @@ var defaultScrapers = map[string]scraperFunc{
 	"cloudflare": scrapeCloudflare,
 	"incapsula":  scrapeIncapsula,
 	"sucuri":     scrapeSucuri,
+	"leaseweb":   scrapeLeaseweb,
 }
 
 var cachedScrapers = map[string]scraperFunc{

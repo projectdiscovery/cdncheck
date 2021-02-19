@@ -89,6 +89,24 @@ func scrapeSucuri(httpClient *http.Client) ([]string, error) {
 	return cidrs, nil
 }
 
+// scrapeLeaseweb scrapes leaseweb firewall's CIDR ranges from ipinfo
+func scrapeLeaseweb(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://ipinfo.io/AS60626")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
 func scrapeProjectDiscovery(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://cdn.projectdiscovery.io/cdn/cdn-ips")
 	if err != nil {
