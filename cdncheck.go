@@ -78,7 +78,10 @@ func new(cache bool) (*Client, error) {
 		if err != nil {
 			continue
 		}
-		ranger.Insert(cidranger.NewBasicRangerEntry(*network))
+
+		if err := ranger.Insert(cidranger.NewBasicRangerEntry(*network)); err != nil {
+			continue
+		}
 	}
 	client.ranger = ranger
 
