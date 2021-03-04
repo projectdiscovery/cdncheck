@@ -125,7 +125,6 @@ func scrapeSucuri(httpClient *http.Client) ([]string, error) {
 	return cidrs, nil
 }
 
-// scrapeFastly scrapes Fastly firewall's CIDR ranges from their API
 func scrapeFastly(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://api.fastly.com/public-ip-list")
 	if err != nil {
@@ -146,7 +145,6 @@ func scrapeFastly(httpClient *http.Client) ([]string, error) {
 // scrapeLeaseweb scrapes leaseweb firewall's CIDR ranges from ipinfo
 func scrapeLeaseweb(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://ipinfo.io/AS60626")
-	resp, err := httpClient.Get("https://api.fastly.com/public-ip-list")
 	if err != nil {
 		return nil, err
 	}

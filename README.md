@@ -1,7 +1,6 @@
 # cdncheck
-
-Helper library that checks if a given IP belongs to known CDN ranges (Akamai, Azure, Cloudflare, CloudFront, Fastly, Incapsula and Sucuri).
-The library can be used by importing `github.com/projectdiscovery/cdncheck`. Here follows a basic example:
+Helper library that checks if a given IP belongs to known CDN ranges (akamai, cloudflare, incapsula, sucuri and leaseweb).
+The library can be used by importing `github.com/projectdiscovery/cdncheck`. here follows a basic example:
 
 ```go
 package main
