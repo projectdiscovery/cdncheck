@@ -22,6 +22,14 @@ func TestScrapeRanges(t *testing.T) {
 		Timeout: time.Duration(30) * time.Second,
 	}
 
+	t.Run("azure", func(t *testing.T) {
+		_, err := scrapeAzure(httpClient)
+		require.Nil(t, err, "Could not scrape azure")
+	})
+	t.Run("cloudfront", func(t *testing.T) {
+		_, err := scrapeCloudFront(httpClient)
+		require.Nil(t, err, "Could not scrape cloudfront")
+	})
 	t.Run("cloudflare", func(t *testing.T) {
 		_, err := scrapeCloudflare(httpClient)
 		require.Nil(t, err, "Could not scrape cloudflare")
@@ -41,6 +49,10 @@ func TestScrapeRanges(t *testing.T) {
 	t.Run("leaseweb", func(t *testing.T) {
 		_, err := scrapeLeaseweb(httpClient)
 		require.Nil(t, err, "Could not scrape leaseweb")
+	})
+	t.Run("fastly", func(t *testing.T) {
+		_, err := scrapeFastly(httpClient)
+		require.Nil(t, err, "Could not scrape fastly")
 	})
 	t.Run("projectdiscovery", func(t *testing.T) {
 		_, err := scrapeProjectDiscovery(httpClient)

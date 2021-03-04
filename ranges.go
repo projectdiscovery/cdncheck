@@ -11,6 +11,42 @@ var cidrRegex = regexp.MustCompile(`[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,
 
 type scraperFunc func(httpClient *http.Client) ([]string, error)
 
+// scrapeAzure scrapes Microsoft Azure firewall's CIDR ranges from their datacenter
+func scrapeAzure(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://download.microsoft.com/download/0/1/8/018E208D-54F8-44CD-AA26-CD7BC9524A8C/PublicIPs_20200824.xml")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+// scrapeCloudFront scrapes CloudFront firewall's CIDR ranges from their API
+func scrapeCloudFront(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
 // scrapeCloudflare scrapes cloudflare firewall's CIDR ranges from their API
 func scrapeCloudflare(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://www.cloudflare.com/ips-v4")
@@ -74,6 +110,23 @@ func scrapeAkamai(httpClient *http.Client) ([]string, error) {
 // scrapeSucuri scrapes sucuri firewall's CIDR ranges from ipinfo
 func scrapeSucuri(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://ipinfo.io/AS30148")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+func scrapeFastly(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://api.fastly.com/public-ip-list")
 	if err != nil {
 		return nil, err
 	}
