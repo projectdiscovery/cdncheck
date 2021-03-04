@@ -24,6 +24,7 @@ var defaultScrapers = map[string]scraperFunc{
 	"fastly":     scrapeFastly,
 	"incapsula":  scrapeIncapsula,
 	"sucuri":     scrapeSucuri,
+	"leaseweb":   scrapeLeaseweb,
 }
 
 var cachedScrapers = map[string]scraperFunc{
@@ -78,10 +79,7 @@ func new(cache bool) (*Client, error) {
 		if err != nil {
 			continue
 		}
-
-		if err := ranger.Insert(cidranger.NewBasicRangerEntry(*network)); err != nil {
-			continue
-		}
+		ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 	}
 	client.ranger = ranger
 

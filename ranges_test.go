@@ -22,13 +22,17 @@ func TestScrapeRanges(t *testing.T) {
 		Timeout: time.Duration(30) * time.Second,
 	}
 
-	t.Run("cloudflare", func(t *testing.T) {
-		_, err := scrapeCloudflare(httpClient)
-		require.Nil(t, err, "Could not scrape cloudflare")
+	t.Run("azure", func(t *testing.T) {
+		_, err := scrapeAzure(httpClient)
+		require.Nil(t, err, "Could not scrape azure")
 	})
 	t.Run("cloudfront", func(t *testing.T) {
 		_, err := scrapeCloudFront(httpClient)
 		require.Nil(t, err, "Could not scrape cloudfront")
+	})
+	t.Run("cloudflare", func(t *testing.T) {
+		_, err := scrapeCloudflare(httpClient)
+		require.Nil(t, err, "Could not scrape cloudflare")
 	})
 	t.Run("incapsula", func(t *testing.T) {
 		_, err := scrapeIncapsula(httpClient)
@@ -38,13 +42,13 @@ func TestScrapeRanges(t *testing.T) {
 		_, err := scrapeAkamai(httpClient)
 		require.Nil(t, err, "Could not scrape akamai")
 	})
-	t.Run("azure", func(t *testing.T) {
-		_, err := scrapeAzure(httpClient)
-		require.Nil(t, err, "Could not scrape azure")
-	})
 	t.Run("sucuri", func(t *testing.T) {
 		_, err := scrapeSucuri(httpClient)
 		require.Nil(t, err, "Could not scrape sucuri")
+	})
+	t.Run("leaseweb", func(t *testing.T) {
+		_, err := scrapeLeaseweb(httpClient)
+		require.Nil(t, err, "Could not scrape leaseweb")
 	})
 	t.Run("fastly", func(t *testing.T) {
 		_, err := scrapeFastly(httpClient)
