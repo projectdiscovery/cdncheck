@@ -18,7 +18,10 @@ type Client struct {
 
 var defaultScrapers = map[string]scraperFunc{
 	"akamai":     scrapeAkamai,
+	"azure":      scrapeAzure,
 	"cloudflare": scrapeCloudflare,
+	"cloudfront": scrapeCloudFront,
+	"fastly":     scrapeFastly,
 	"incapsula":  scrapeIncapsula,
 	"sucuri":     scrapeSucuri,
 	"leaseweb":   scrapeLeaseweb,
