@@ -23,39 +23,33 @@ func TestScrapeRanges(t *testing.T) {
 	}
 
 	t.Run("azure", func(t *testing.T) {
-		_, err := scrapeAzure(httpClient)
+		ips, err := scrapeAzure(httpClient)
 		require.Nil(t, err, "Could not scrape azure")
+		require.Positive(t, len(ips), "Empty ip list")
 	})
 	t.Run("cloudfront", func(t *testing.T) {
-		_, err := scrapeCloudFront(httpClient)
+		ips, err := scrapeCloudFront(httpClient)
 		require.Nil(t, err, "Could not scrape cloudfront")
+		require.Positive(t, len(ips), "Empty ip list")
 	})
 	t.Run("cloudflare", func(t *testing.T) {
-		_, err := scrapeCloudflare(httpClient)
+		ips, err := scrapeCloudflare(httpClient)
 		require.Nil(t, err, "Could not scrape cloudflare")
+		require.Positive(t, len(ips), "Empty ip list")
 	})
 	t.Run("incapsula", func(t *testing.T) {
-		_, err := scrapeIncapsula(httpClient)
+		ips, err := scrapeIncapsula(httpClient)
 		require.Nil(t, err, "Could not scrape incapsula")
-	})
-	t.Run("akamai", func(t *testing.T) {
-		_, err := scrapeAkamai(httpClient)
-		require.Nil(t, err, "Could not scrape akamai")
-	})
-	t.Run("sucuri", func(t *testing.T) {
-		_, err := scrapeSucuri(httpClient)
-		require.Nil(t, err, "Could not scrape sucuri")
-	})
-	t.Run("leaseweb", func(t *testing.T) {
-		_, err := scrapeLeaseweb(httpClient)
-		require.Nil(t, err, "Could not scrape leaseweb")
+		require.Positive(t, len(ips), "Empty ip list")
 	})
 	t.Run("fastly", func(t *testing.T) {
-		_, err := scrapeFastly(httpClient)
+		ips, err := scrapeFastly(httpClient)
 		require.Nil(t, err, "Could not scrape fastly")
+		require.Positive(t, len(ips), "Empty ip list")
 	})
 	t.Run("projectdiscovery", func(t *testing.T) {
-		_, err := scrapeProjectDiscovery(httpClient)
+		ips, err := scrapeProjectDiscovery(httpClient)
 		require.Nil(t, err, "Could not scrape projectdiscovery")
+		require.Positive(t, len(ips), "Empty ip list")
 	})
 }
