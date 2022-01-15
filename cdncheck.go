@@ -12,8 +12,7 @@ import (
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
-	Data   map[string]struct{}
-	ranger cidranger.Ranger
+	rangers map[string]cidranger.Ranger
 }
 
 var defaultScrapers = map[string]scraperFunc{
@@ -62,31 +61,32 @@ func new(cache bool) (*Client, error) {
 		scrapers = defaultScrapers
 	}
 
-	client.Data = make(map[string]struct{})
-	for _, scraper := range scrapers {
+	client.rangers = make(map[string]cidranger.Ranger)
+	for provider, scraper := range scrapers {
 		cidrs, err := scraper(httpClient)
 		if err != nil {
 			return nil, err
 		}
+
+		ranger := cidranger.NewPCTrieRanger()
 		for _, cidr := range cidrs {
-			client.Data[cidr] = struct{}{}
+			_, network, err := net.ParseCIDR(cidr)
+			if err != nil {
+				continue
+			}
+			ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 		}
+		client.rangers[provider] = ranger
 	}
-
-	ranger := cidranger.NewPCTrieRanger()
-	for cidr := range client.Data {
-		_, network, err := net.ParseCIDR(cidr)
-		if err != nil {
-			continue
-		}
-		ranger.Insert(cidranger.NewBasicRangerEntry(*network))
-	}
-	client.ranger = ranger
-
 	return client, nil
 }
 
 // Check checks if an IP is contained in the blacklist
-func (c *Client) Check(ip net.IP) (bool, error) {
-	return c.ranger.Contains(ip)
+func (c *Client) Check(ip net.IP) (bool, string, error) {
+	for provider, ranger := range c.rangers {
+		if contains, err := ranger.Contains(ip); contains {
+			return true, provider, err
+		}
+	}
+	return false, "", nil
 }
