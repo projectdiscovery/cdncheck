@@ -10,6 +10,7 @@ import (
 var cidrRegex = regexp.MustCompile(`[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[0-9]{1,3}`)
 
 type scraperFunc func(httpClient *http.Client) ([]string, error)
+type scraperWithOptionsFunc func(httpClient *http.Client, options *Options) ([]string, error)
 
 // scrapeAzure scrapes Microsoft Azure firewall's CIDR ranges from their datacenter
 func scrapeAzure(httpClient *http.Client) ([]string, error) {
@@ -90,8 +91,12 @@ func scrapeIncapsula(httpClient *http.Client) ([]string, error) {
 }
 
 // scrapeAkamai scrapes akamai firewall's CIDR ranges from ipinfo
-func scrapeAkamai(httpClient *http.Client) ([]string, error) {
-	resp, err := httpClient.Get("https://ipinfo.io/AS12222")
+func scrapeAkamai(httpClient *http.Client, options *Options) ([]string, error) {
+	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS12222", "Authorization", "Bearer "+options.IPInfoToken)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +113,12 @@ func scrapeAkamai(httpClient *http.Client) ([]string, error) {
 }
 
 // scrapeSucuri scrapes sucuri firewall's CIDR ranges from ipinfo
-func scrapeSucuri(httpClient *http.Client) ([]string, error) {
-	resp, err := httpClient.Get("https://ipinfo.io/AS30148")
+func scrapeSucuri(httpClient *http.Client, options *Options) ([]string, error) {
+	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS30148", "Authorization", "Bearer "+options.IPInfoToken)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +152,12 @@ func scrapeFastly(httpClient *http.Client) ([]string, error) {
 }
 
 // scrapeLeaseweb scrapes leaseweb firewall's CIDR ranges from ipinfo
-func scrapeLeaseweb(httpClient *http.Client) ([]string, error) {
-	resp, err := httpClient.Get("https://ipinfo.io/AS60626")
+func scrapeLeaseweb(httpClient *http.Client, options *Options) ([]string, error) {
+	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS60626", "Authorization", "Bearer "+options.IPInfoToken)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -175,4 +188,13 @@ func scrapeProjectDiscovery(httpClient *http.Client) ([]string, error) {
 
 	cidrs := cidrRegex.FindAllString(body, -1)
 	return cidrs, nil
+}
+
+func makeReqWithAuth(method, URL, headerName, bearerValue string) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodGet, URL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add(headerName, "Bearer "+bearerValue)
+	return req, nil
 }

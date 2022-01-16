@@ -12,19 +12,26 @@ import (
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
-	Data   map[string]struct{}
-	ranger cidranger.Ranger
+	Options Options
+	Data    map[string]struct{}
+	ranger  cidranger.Ranger
 }
 
 var defaultScrapers = map[string]scraperFunc{
-	"akamai":     scrapeAkamai,
+	// "akamai":     scrapeAkamai,
 	"azure":      scrapeAzure,
 	"cloudflare": scrapeCloudflare,
 	"cloudfront": scrapeCloudFront,
 	"fastly":     scrapeFastly,
 	"incapsula":  scrapeIncapsula,
-	"sucuri":     scrapeSucuri,
-	"leaseweb":   scrapeLeaseweb,
+	// "sucuri":     scrapeSucuri,
+	// "leaseweb":   scrapeLeaseweb,
+}
+
+var defaultScrapersWithOptions = map[string]scraperWithOptionsFunc{
+	"akamai":   scrapeAkamai,
+	"sucuri":   scrapeSucuri,
+	"leaseweb": scrapeLeaseweb,
 }
 
 var cachedScrapers = map[string]scraperFunc{
@@ -33,15 +40,20 @@ var cachedScrapers = map[string]scraperFunc{
 
 // New creates a new firewall IP checking client.
 func New() (*Client, error) {
-	return new(false)
+	return new(&Options{})
 }
 
 // NewWithCache creates a new firewall IP with cached data from project discovery (faster)
 func NewWithCache() (*Client, error) {
-	return new(true)
+	return new(&Options{Cache: true})
 }
 
-func new(cache bool) (*Client, error) {
+// NewWithOptions creates a new instance with options
+func NewWithOptions(Options *Options) (*Client, error) {
+	return new(Options)
+}
+
+func new(options *Options) (*Client, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			MaxIdleConns:        100,
@@ -55,21 +67,31 @@ func new(cache bool) (*Client, error) {
 	}
 	client := &Client{}
 
-	var scrapers map[string]scraperFunc
-	if cache {
-		scrapers = cachedScrapers
+	if options.Cache {
+		for _, scraper := range cachedScrapers {
+			cidrs, err := scraper(httpClient)
+			if err != nil {
+				return nil, err
+			}
+			client.parseCidrs(cidrs)
+		}
 	} else {
-		scrapers = defaultScrapers
+		for _, scraper := range defaultScrapers {
+			cidrs, err := scraper(httpClient)
+			if err != nil {
+				return nil, err
+			}
+			client.parseCidrs(cidrs)
+		}
 	}
 
-	client.Data = make(map[string]struct{})
-	for _, scraper := range scrapers {
-		cidrs, err := scraper(httpClient)
-		if err != nil {
-			return nil, err
-		}
-		for _, cidr := range cidrs {
-			client.Data[cidr] = struct{}{}
+	if options.HasAuthInfo() {
+		for _, scraper := range defaultScrapersWithOptions {
+			cidrs, err := scraper(httpClient, options)
+			if err != nil {
+				return nil, err
+			}
+			client.parseCidrs(cidrs)
 		}
 	}
 
@@ -84,6 +106,16 @@ func new(cache bool) (*Client, error) {
 	client.ranger = ranger
 
 	return client, nil
+}
+
+// parseCidrs inserts the scraped cidrs to the internal structure
+func (c *Client) parseCidrs(cidrs []string) {
+	if c.Data == nil {
+		c.Data = make(map[string]struct{})
+	}
+	for _, cidr := range cidrs {
+		c.Data[cidr] = struct{}{}
+	}
 }
 
 // Check checks if an IP is contained in the blacklist
