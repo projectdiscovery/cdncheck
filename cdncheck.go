@@ -12,6 +12,7 @@ import (
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
+	ranges  map[string][]string
 	rangers map[string]cidranger.Ranger
 }
 
@@ -24,10 +25,6 @@ var defaultScrapers = map[string]scraperFunc{
 	"incapsula":  scrapeIncapsula,
 	"sucuri":     scrapeSucuri,
 	"leaseweb":   scrapeLeaseweb,
-}
-
-var cachedScrapers = map[string]scraperFunc{
-	"projectdiscovery": scrapeProjectDiscovery,
 }
 
 // New creates a new firewall IP checking client.
@@ -54,20 +51,29 @@ func new(cache bool) (*Client, error) {
 	}
 	client := &Client{}
 
-	var scrapers map[string]scraperFunc
+	var err error
 	if cache {
-		scrapers = cachedScrapers
+		err = client.getCDNDataFromCache(httpClient)
 	} else {
-		scrapers = defaultScrapers
+		err = client.getCDNData(httpClient)
 	}
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
 
-	client.rangers = make(map[string]cidranger.Ranger)
-	for provider, scraper := range scrapers {
+func (c *Client) getCDNData(httpClient *http.Client) error {
+	c.ranges = make(map[string][]string)
+	c.rangers = make(map[string]cidranger.Ranger)
+
+	for provider, scraper := range defaultScrapers {
 		cidrs, err := scraper(httpClient)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
+		c.ranges[provider] = cidrs
 		ranger := cidranger.NewPCTrieRanger()
 		for _, cidr := range cidrs {
 			_, network, err := net.ParseCIDR(cidr)
@@ -76,9 +82,32 @@ func new(cache bool) (*Client, error) {
 			}
 			ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 		}
-		client.rangers[provider] = ranger
+		c.rangers[provider] = ranger
 	}
-	return client, nil
+	return nil
+}
+
+func (c *Client) getCDNDataFromCache(httpClient *http.Client) error {
+	var err error
+	c.ranges, err = scrapeProjectDiscovery(httpClient)
+	if err != nil {
+		return err
+	}
+
+	c.rangers = make(map[string]cidranger.Ranger)
+	for provider, ranges := range c.ranges {
+		ranger := cidranger.NewPCTrieRanger()
+
+		for _, cidr := range ranges {
+			_, network, err := net.ParseCIDR(cidr)
+			if err != nil {
+				continue
+			}
+			ranger.Insert(cidranger.NewBasicRangerEntry(*network))
+		}
+		c.rangers[provider] = ranger
+	}
+	return nil
 }
 
 // Check checks if an IP is contained in the blacklist
@@ -89,4 +118,9 @@ func (c *Client) Check(ip net.IP) (bool, string, error) {
 		}
 	}
 	return false, "", nil
+}
+
+// Ranges returns the providers and ranges for the cdn client
+func (c *Client) Ranges() map[string][]string {
+	return c.ranges
 }
