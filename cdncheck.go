@@ -12,32 +12,41 @@ import (
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
+	Options *Options
 	ranges  map[string][]string
 	rangers map[string]cidranger.Ranger
 }
 
 var defaultScrapers = map[string]scraperFunc{
-	"akamai":     scrapeAkamai,
 	"azure":      scrapeAzure,
 	"cloudflare": scrapeCloudflare,
 	"cloudfront": scrapeCloudFront,
 	"fastly":     scrapeFastly,
 	"incapsula":  scrapeIncapsula,
-	"sucuri":     scrapeSucuri,
-	"leaseweb":   scrapeLeaseweb,
+}
+
+var defaultScrapersWithOptions = map[string]scraperWithOptionsFunc{
+	"akamai":   scrapeAkamai,
+	"sucuri":   scrapeSucuri,
+	"leaseweb": scrapeLeaseweb,
 }
 
 // New creates a new firewall IP checking client.
 func New() (*Client, error) {
-	return new(false)
+	return new(&Options{})
 }
 
 // NewWithCache creates a new firewall IP with cached data from project discovery (faster)
 func NewWithCache() (*Client, error) {
-	return new(true)
+	return new(&Options{Cache: true})
 }
 
-func new(cache bool) (*Client, error) {
+// NewWithOptions creates a new instance with options
+func NewWithOptions(Options *Options) (*Client, error) {
+	return new(Options)
+}
+
+func new(options *Options) (*Client, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			MaxIdleConns:        100,
@@ -49,10 +58,10 @@ func new(cache bool) (*Client, error) {
 		},
 		Timeout: time.Duration(30) * time.Second,
 	}
-	client := &Client{}
+	client := &Client{Options: options}
 
 	var err error
-	if cache {
+	if options.Cache {
 		err = client.getCDNDataFromCache(httpClient)
 	} else {
 		err = client.getCDNData(httpClient)
@@ -82,7 +91,24 @@ func (c *Client) getCDNData(httpClient *http.Client) error {
 			}
 			ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 		}
-		c.rangers[provider] = ranger
+	}
+	if c.Options.HasAuthInfo() {
+		for provider, scraper := range defaultScrapersWithOptions {
+			cidrs, err := scraper(httpClient, c.Options)
+			if err != nil {
+				return err
+			}
+
+			c.ranges[provider] = cidrs
+			ranger := cidranger.NewPCTrieRanger()
+			for _, cidr := range cidrs {
+				_, network, err := net.ParseCIDR(cidr)
+				if err != nil {
+					continue
+				}
+				ranger.Insert(cidranger.NewBasicRangerEntry(*network))
+			}
+		}
 	}
 	return nil
 }
