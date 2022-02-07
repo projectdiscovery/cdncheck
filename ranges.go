@@ -176,7 +176,7 @@ func scrapeLeaseweb(httpClient *http.Client, options *Options) ([]string, error)
 }
 
 func scrapeProjectDiscovery(httpClient *http.Client) (map[string][]string, error) {
-	resp, err := httpClient.Get("https://cdn.projectdiscovery.io/cdn/cdn-ips")
+	resp, err := httpClient.Get("https://cdn.nuclei.sh")
 	if err != nil {
 		return nil, err
 	}
