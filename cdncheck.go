@@ -89,7 +89,7 @@ func (c *Client) getCDNData(httpClient *http.Client) error {
 			if err != nil {
 				continue
 			}
-			ranger.Insert(cidranger.NewBasicRangerEntry(*network))
+			_ = ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 		}
 	}
 	if c.Options.HasAuthInfo() {
@@ -106,7 +106,7 @@ func (c *Client) getCDNData(httpClient *http.Client) error {
 				if err != nil {
 					continue
 				}
-				ranger.Insert(cidranger.NewBasicRangerEntry(*network))
+				_ = ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 			}
 		}
 	}
@@ -129,7 +129,7 @@ func (c *Client) getCDNDataFromCache(httpClient *http.Client) error {
 			if err != nil {
 				continue
 			}
-			ranger.Insert(cidranger.NewBasicRangerEntry(*network))
+			_ = ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 		}
 		c.rangers[provider] = ranger
 	}
