@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 var cidrRegex = regexp.MustCompile(`[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[0-9]{1,3}`)
@@ -173,21 +175,18 @@ func scrapeLeaseweb(httpClient *http.Client, options *Options) ([]string, error)
 	return cidrs, nil
 }
 
-func scrapeProjectDiscovery(httpClient *http.Client) ([]string, error) {
-	resp, err := httpClient.Get("https://cdn.projectdiscovery.io/cdn/cdn-ips")
+func scrapeProjectDiscovery(httpClient *http.Client) (map[string][]string, error) {
+	resp, err := httpClient.Get("https://cdn.nuclei.sh")
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	var data map[string][]string
+	if err := jsoniter.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
 	}
-	body := string(data)
-
-	cidrs := cidrRegex.FindAllString(body, -1)
-	return cidrs, nil
+	return data, nil
 }
 
 func makeReqWithAuth(method, URL, headerName, bearerValue string) (*http.Request, error) {
