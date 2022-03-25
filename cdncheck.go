@@ -75,7 +75,6 @@ func new(options *Options) (*Client, error) {
 func (c *Client) getCDNData(httpClient *http.Client) error {
 	c.ranges = make(map[string][]string)
 	c.rangers = make(map[string]cidranger.Ranger)
-
 	for provider, scraper := range defaultScrapers {
 		cidrs, err := scraper(httpClient)
 		if err != nil {
@@ -91,6 +90,7 @@ func (c *Client) getCDNData(httpClient *http.Client) error {
 			}
 			_ = ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 		}
+		c.rangers[provider] = ranger
 	}
 	if c.Options.HasAuthInfo() {
 		for provider, scraper := range defaultScrapersWithOptions {
@@ -108,6 +108,7 @@ func (c *Client) getCDNData(httpClient *http.Client) error {
 				}
 				_ = ranger.Insert(cidranger.NewBasicRangerEntry(*network))
 			}
+			c.rangers[provider] = ranger
 		}
 	}
 	return nil
