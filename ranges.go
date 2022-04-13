@@ -32,6 +32,42 @@ func scrapeAzure(httpClient *http.Client) ([]string, error) {
 	return cidrs, nil
 }
 
+// scrapeGoogle scrapes Google Cloud CIDR range
+func scrapeGoogle(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://www.gstatic.com/ipranges/cloud.json")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+// scrapeOracle scrapes Oracle Cloud CIDR range
+func scrapeOracle(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
 // scrapeCloudFront scrapes CloudFront firewall's CIDR ranges from their API
 func scrapeCloudFront(httpClient *http.Client) ([]string, error) {
 	resp, err := httpClient.Get("https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips")

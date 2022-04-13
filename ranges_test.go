@@ -52,4 +52,14 @@ func TestScrapeRanges(t *testing.T) {
 		require.Nil(t, err, "Could not scrape projectdiscovery")
 		require.Positive(t, len(ips), "Empty ip list")
 	})
+	t.Run("google", func(t *testing.T) {
+		ips, err := scrapeGoogle(httpClient)
+		require.Nil(t, err, "Could not scrape google")
+		require.Positive(t, len(ips), "Empty ip list")
+	})
+	t.Run("oracle", func(t *testing.T) {
+		ips, err := scrapeOracle(httpClient)
+		require.Nil(t, err, "Could not scrape google")
+		require.Positive(t, len(ips), "Empty ip list")
+	})
 }
