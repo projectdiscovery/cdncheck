@@ -33,6 +33,18 @@ var defaultScrapersWithOptions = map[string]scraperWithOptionsFunc{
 	"leaseweb": scrapeLeaseweb,
 }
 
+// GetDefaultProviders exports default providers
+func GetDefaultProviders() []string {
+	var provider []string
+	for key := range defaultScrapers {
+		provider = append(provider, key)
+	}
+	for key := range defaultScrapersWithOptions {
+		provider = append(provider, key)
+	}
+	return provider
+}
+
 // New creates a new firewall IP checking client.
 func New() (*Client, error) {
 	return new(&Options{})
