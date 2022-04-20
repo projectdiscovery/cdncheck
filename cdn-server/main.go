@@ -64,6 +64,10 @@ func cdncheckRefreshDataFunc() {
 		log.Printf("[err] could not create cdncheck client: %s\n", err)
 		return
 	}
+	if client.Options != nil {
+		client.Options.ParseFromEnv()
+	}
+
 	data := client.Ranges()
 
 	var buf bytes.Buffer
