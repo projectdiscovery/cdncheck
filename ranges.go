@@ -1,11 +1,13 @@
 package cdncheck
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
 
+	"github.com/ipinfo/go/v2/ipinfo"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -130,46 +132,12 @@ func scrapeIncapsula(httpClient *http.Client) ([]string, error) {
 
 // scrapeAkamai scrapes akamai firewall's CIDR ranges from ipinfo
 func scrapeAkamai(httpClient *http.Client, options *Options) ([]string, error) {
-	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS12222", "Authorization", "Bearer "+options.IPInfoToken)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	body := string(data)
-
-	cidrs := cidrRegex.FindAllString(body, -1)
-	return cidrs, nil
+	return getIpInfoASN(httpClient, options.IPInfoToken, "AS12222")
 }
 
 // scrapeSucuri scrapes sucuri firewall's CIDR ranges from ipinfo
 func scrapeSucuri(httpClient *http.Client, options *Options) ([]string, error) {
-	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS30148", "Authorization", "Bearer "+options.IPInfoToken)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	body := string(data)
-
-	cidrs := cidrRegex.FindAllString(body, -1)
-	return cidrs, nil
+	return getIpInfoASN(httpClient, options.IPInfoToken, "AS30148")
 }
 
 func scrapeFastly(httpClient *http.Client) ([]string, error) {
@@ -191,24 +159,7 @@ func scrapeFastly(httpClient *http.Client) ([]string, error) {
 
 // scrapeLeaseweb scrapes leaseweb firewall's CIDR ranges from ipinfo
 func scrapeLeaseweb(httpClient *http.Client, options *Options) ([]string, error) {
-	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS60626", "Authorization", "Bearer "+options.IPInfoToken)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	body := string(data)
-
-	cidrs := cidrRegex.FindAllString(body, -1)
-	return cidrs, nil
+	return getIpInfoASN(httpClient, options.IPInfoToken, "AS60626")
 }
 
 func scrapeProjectDiscovery(httpClient *http.Client) (map[string][]string, error) {
@@ -225,11 +176,21 @@ func scrapeProjectDiscovery(httpClient *http.Client) (map[string][]string, error
 	return data, nil
 }
 
-func makeReqWithAuth(method, URL, headerName, bearerValue string) (*http.Request, error) {
-	req, err := http.NewRequest(http.MethodGet, URL, nil)
+func getIpInfoASN(httpClient *http.Client, token string, asn string) ([]string, error) {
+	if token == "" {
+		return nil, errors.New("ipinfo auth token not specified")
+	}
+	ipinfoClient := ipinfo.NewClient(httpClient, nil, token)
+	info, err := ipinfoClient.GetASNDetails(asn)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add(headerName, "Bearer "+bearerValue)
-	return req, nil
+	if info == nil {
+		return nil, nil
+	}
+	var cidrs []string
+	for _, prefix := range info.Prefixes {
+		cidrs = append(cidrs, prefix.Netblock)
+	}
+	return cidrs, nil
 }
