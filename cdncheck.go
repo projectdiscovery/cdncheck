@@ -63,6 +63,7 @@ func NewWithOptions(Options *Options) (*Client, error) {
 func new(options *Options) (*Client, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
+			Proxy:               http.ProxyFromEnvironment,
 			MaxIdleConns:        100,
 			MaxIdleConnsPerHost: 100,
 			TLSClientConfig: &tls.Config{
