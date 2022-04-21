@@ -59,7 +59,9 @@ func cdncheckWorker() context.CancelFunc {
 func cdncheckRefreshDataFunc() {
 	log.Printf("[%s] Refreshing cdncheck data from providers\n", time.Now().String())
 
-	client, err := cdncheck.New()
+	options := &cdncheck.Options{}
+	options.ParseFromEnv()
+	client, err := cdncheck.NewWithOptions(options)
 	if err != nil {
 		log.Printf("[err] could not create cdncheck client: %s\n", err)
 		return
