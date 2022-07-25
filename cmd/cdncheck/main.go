@@ -92,19 +92,19 @@ func processInputItemSingle(item string, opts *options, cdnclient *cdncheck.Clie
 		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
 		return
 	}
-	if isCDN {
-		if !opts.exclude {
-			fmt.Printf("[%s] %s\n", provider, item)
+	if !isCDN {
+		if !opts.print {
+			fmt.Printf("%s\n", item)
 		}
-	} else if opts.exclude {
-		fmt.Printf("%s\n", item)
+	} else if opts.print {
+		fmt.Printf("[%s] %s\n", provider, item)
 	}
 }
 
 type options struct {
 	inputs   goflags.StringSlice
 	list     string
-	exclude  bool
+	print    bool
 	hasStdin bool
 }
 
@@ -117,7 +117,7 @@ func readFlags() (*options, error) {
 	flagSet.SetDescription("cdncheck is a utility for ignoring CDN range IPs")
 	flagSet.StringSliceVarP(&opts.inputs, "inputs", "i", nil, "inputs to process", goflags.CommaSeparatedStringSliceOptions)
 	flagSet.StringVarP(&opts.list, "list", "l", "", "file with inputs to process")
-	flagSet.BoolVarP(&opts.exclude, "exclude", "e", false, "exclude CDN ips (default to display)")
+	flagSet.BoolVarP(&opts.print, "print", "p", false, "print CDN ips (default to exclude)")
 
 	return opts, flagSet.Parse()
 }
