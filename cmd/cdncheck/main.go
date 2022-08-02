@@ -25,11 +25,7 @@ func process() error {
 	if err != nil {
 		return errors.Wrap(err, "could not parse flags")
 	}
-	cdnclient, err := cdncheck.NewWithCache()
-	if err != nil {
-		return errors.Wrap(err, "could not create cdncheck client")
-	}
-	return execute(options, cdnclient)
+	return execute(options, cdncheck.New())
 }
 
 func execute(opts *options, cdnclient *cdncheck.Client) error {
@@ -87,7 +83,7 @@ func processInputItemSingle(item string, opts *options, cdnclient *cdncheck.Clie
 		gologger.Error().Msgf("Could not parse IP address: %s", item)
 		return
 	}
-	isCDN, provider, err := cdnclient.Check(parsed)
+	isCDN, provider, itemType, err := cdnclient.Check(parsed)
 	if err != nil {
 		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
 		return
@@ -97,7 +93,7 @@ func processInputItemSingle(item string, opts *options, cdnclient *cdncheck.Clie
 			fmt.Printf("%s\n", item)
 		}
 	} else if opts.print {
-		fmt.Printf("[%s] %s\n", provider, item)
+		fmt.Printf("[%s] [%s] %s\n", itemType, provider, item)
 	}
 }
 
