@@ -19,30 +19,30 @@ type Output struct {
 }
 
 func (o *Output) String() string {
-	if o.Cdn {
-		return fmt.Sprintf("%s [%s] [%s]", o.IP, o.itemType, o.CdnName)
-	}
+	return fmt.Sprintf("%s [%s] [%s]", o.IP, o.itemType, o.CdnName)
+}
+func (o *Output) StringIP() string {
 	return o.IP
 }
 
 type Options struct {
-	inputs     goflags.StringSlice
-	list       string
-	resp       bool
-	hasStdin   bool
-	output     string
-	version    bool
-	json       bool
-	cdn        bool
-	cloud      bool
-	waf        bool
-	matchCdn   goflags.StringSlice
-	matchCloud goflags.StringSlice
-	matchWaf   goflags.StringSlice
-	filterCdn  goflags.StringSlice
-	fiterCloud goflags.StringSlice
-	filterWaf  goflags.StringSlice
-	exclude    bool
+	inputs      goflags.StringSlice
+	list        string
+	response    bool
+	hasStdin    bool
+	output      string
+	version     bool
+	json        bool
+	cdn         bool
+	cloud       bool
+	waf         bool
+	exclude     bool
+	matchCdn    goflags.StringSlice
+	matchCloud  goflags.StringSlice
+	matchWaf    goflags.StringSlice
+	filterCdn   goflags.StringSlice
+	filterCloud goflags.StringSlice
+	filterWaf   goflags.StringSlice
 }
 
 func ParseOptions() *Options {
@@ -59,7 +59,7 @@ func readFlags() (*Options, error) {
 	opts.hasStdin = fileutil.HasStdin()
 
 	flagSet := goflags.NewFlagSet()
-	flagSet.SetDescription("cdncheck is a utility for ignoring CDN range IPs")
+	flagSet.SetDescription("cdncheck is a tool for identifying the technology associated with ip network addresses.")
 
 	flagSet.CreateGroup("input", "Input",
 		flagSet.StringSliceVarP(&opts.inputs, "inputs", "i", nil, "inputs to process", goflags.CommaSeparatedStringSliceOptions),
@@ -73,7 +73,7 @@ func readFlags() (*Options, error) {
 	)
 
 	flagSet.CreateGroup("output", "Output",
-		flagSet.BoolVarP(&opts.resp, "resp", "", false, "display technology name in cli output"),
+		flagSet.BoolVarP(&opts.response, "resp", "", false, "display technology name in cli output"),
 		flagSet.StringVarP(&opts.output, "output", "o", "", "write output in plain format to file"),
 		flagSet.BoolVarP(&opts.version, "version", "", false, "display version of the project"),
 		flagSet.BoolVarP(&opts.json, "json", "", false, "write output in json format to file"),
@@ -87,7 +87,7 @@ func readFlags() (*Options, error) {
 
 	flagSet.CreateGroup("filters", "Filters",
 		flagSet.StringSliceVarP(&opts.filterCdn, "filter-cdn", "fcdn", nil, "filter host with specified cdn provider (fastly, incapsula)", goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.fiterCloud, "filter-cloud", "fcloud", nil, "filter host with specified cloud provider (fastly, incapsula)", goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.filterCloud, "filter-cloud", "fcloud", nil, "filter host with specified cloud provider (fastly, incapsula)", goflags.CommaSeparatedStringSliceOptions),
 		flagSet.StringSliceVarP(&opts.filterWaf, "filter-waf", "fwaf", nil, "filter host with specified waf provider (fastly, incapsula)", goflags.CommaSeparatedStringSliceOptions),
 		flagSet.BoolVarP(&opts.exclude, "exclude", "e", false, "exclude detected ip from output"),
 	)
