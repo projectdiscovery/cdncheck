@@ -16,11 +16,3 @@ func main() {
 	}
 }
 
-// func process() error {
-// 	options, err := readFlags()
-// 	if err != nil {
-// 		return errors.Wrap(err, "could not parse flags")
-// 	}
-// 	return execute(options, cdncheck.New())
-// }
-// Parse the command line flags and read config files
