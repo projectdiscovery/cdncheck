@@ -53,3 +53,18 @@ func (c *Client) Check(ip net.IP) (matched bool, value string, itemType string, 
 	}
 	return false, "", "", err
 }
+
+// GetDefaultProviders exports default providers
+func GetDefaultProviders() []string {
+	var provider []string
+	for k := range generatedData.CDN {
+		provider = append(provider, k)
+	}
+	for k := range generatedData.WAF {
+		provider = append(provider, k)
+	}
+	for k := range generatedData.Cloud {
+		provider = append(provider, k)
+	}
+	return provider
+}

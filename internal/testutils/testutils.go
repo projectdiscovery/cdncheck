@@ -14,4 +14,8 @@ var TestCases = []TestCase{
 	{Target: "54.192.171.16", Expected: []string{"54.192.171.16 [cdn] [cloudfront]"}, Args: "-resp -cdn"},
 	{Target: "185.199.109.153", Expected: []string{"185.199.109.153"}, Args: "-e"},
 	{Target: "185.199.109.153", Expected: []string{"185.199.109.153"}, Args: "-resp -e"},
+	{Target: "54.192.171.16", Expected: []string{"54.192.171.16 [cdn] [cloudfront]"}, Args: "-resp -mcdn cloudfront"},
+	{Target: "54.192.171.16", Expected: []string{}, Args: "-resp -fcdn cloudfront"},
+	{Target: "Filter flags", Expected: []string{}, Args: "-l test-data/list.txt -resp -fcdn cloudfront -fcloud aws -fwaf cloudflare"},
+	{Target: "Filter and Match flags", Expected: []string{"54.192.171.16 [cdn] [cloudfront]", "104.16.51.111 [waf] [cloudflare]"}, Args: "-l test-data/list.txt -resp -mcdn cloudfront -mwaf cloudflare -fcloud aws"},
 }

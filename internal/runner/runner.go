@@ -75,6 +75,10 @@ func (r *Runner) waitForData(output chan Output, writer *OutputWriter, wg *sync.
 	defer wg.Done()
 	for receivedData := range output {
 		if r.options.json {
+			if receivedData.itemType != "cdn" {
+				receivedData.Cdn = false
+				receivedData.CdnName = ""
+			}
 			writer.WriteJSON(receivedData)
 		} else {
 			if r.options.response && !r.options.exclude {
@@ -152,12 +156,8 @@ func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.C
 	}
 	switch {
 	case options.cdn && data.itemType == "cdn",
-
-		options.cloud && data.itemType == "cloud":
-		{
-			output <- data
-		}
-	case options.waf && data.itemType == "waf":
+		options.cloud && data.itemType == "cloud",
+		options.waf && data.itemType == "waf":
 		{
 			output <- data
 		}
