@@ -75,10 +75,6 @@ func (r *Runner) waitForData(output chan Output, writer *OutputWriter, wg *sync.
 	defer wg.Done()
 	for receivedData := range output {
 		if r.options.json {
-			if receivedData.itemType != "cdn" {
-				receivedData.Cdn = false
-				receivedData.CdnName = ""
-			}
 			writer.WriteJSON(receivedData)
 		} else {
 			if r.options.response && !r.options.exclude {
@@ -138,15 +134,24 @@ func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.C
 	data := Output{
 		Timestamp: time.Now(),
 		IP:        item,
-		Cdn:       isCDN,
-		CdnName:   provider,
 		itemType:  itemType,
 	}
 	if options.exclude {
-		if !data.Cdn {
+		if !isCDN {
 			output <- data
 		}
 		return
+	}
+	switch itemType {
+	case "cdn":
+		data.Cdn = isCDN
+		data.CdnName = provider
+	case "cloud":
+		data.Cloud = isCDN
+		data.CloudName = provider
+	case "waf":
+		data.Waf = isCDN
+		data.WafName = provider
 	}
 	if skipped := filterIP(options, data); skipped {
 		return
@@ -161,7 +166,7 @@ func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.C
 		{
 			output <- data
 		}
-	case (!options.cdn && !options.waf && !options.cloud) && data.Cdn:
+	case (!options.cdn && !options.waf && !options.cloud) && isCDN:
 		{
 			output <- data
 		}
@@ -185,7 +190,7 @@ func matchIP(options *Options, data Output) bool {
 	if len(options.matchCloud) > 0 && data.itemType == "cloud" {
 		matched := false
 		for _, filter := range options.matchCloud {
-			if filter == data.CdnName {
+			if filter == data.CloudName {
 				matched = true
 			}
 		}
@@ -196,7 +201,7 @@ func matchIP(options *Options, data Output) bool {
 	if len(options.matchWaf) > 0 && data.itemType == "waf" {
 		matched := false
 		for _, filter := range options.matchWaf {
-			if filter == data.CdnName {
+			if filter == data.WafName {
 				matched = true
 			}
 		}
@@ -219,14 +224,14 @@ func filterIP(options *Options, data Output) bool {
 	}
 	if len(options.filterCloud) > 0 && data.itemType == "cloud" {
 		for _, filter := range options.filterCloud {
-			if filter == data.CdnName {
+			if filter == data.CloudName {
 				return true
 			}
 		}
 	}
 	if len(options.filterWaf) > 0 && data.itemType == "waf" {
 		for _, filter := range options.filterWaf {
-			if filter == data.CdnName {
+			if filter == data.WafName {
 				return true
 			}
 		}
