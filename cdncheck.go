@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+var (
+	DefaultCDNProviders   = mapKeys(generatedData.CDN)
+	DefaultWafProviders   = mapKeys(generatedData.WAF)
+	DefaultCloudProviders = mapKeys(generatedData.Cloud)
+)
+
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
@@ -57,28 +63,10 @@ func (c *Client) Check(ip net.IP) (matched bool, value string, itemType string, 
 	return false, "", "", err
 }
 
-// GetDefaultProviders exports default providers
-func GetDefaultProviders() map[string][]string {
-	var providers = make(map[string][]string)
-	var provider []string
-	for k := range generatedData.CDN {
-		provider = append(provider, k)
+func mapKeys(m map[string][]string) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
 	}
-	providers["cdn"] = provider
-	provider = nil
-	for k := range generatedData.Cloud {
-		provider = append(provider, k)
-	}
-	providers["cloud"] = provider
-	provider = nil
-	for k := range generatedData.WAF {
-		provider = append(provider, k)
-	}
-	providers["waf"] = provider
-	return providers
-}
-func MapKeys(m map[string][]string, key string) string {
-	var keys []string
-	keys = append(keys, m[key]...)
 	return strings.Join(keys, ", ")
 }
