@@ -3,7 +3,6 @@ package runner
 import (
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/projectdiscovery/cdncheck"
@@ -12,9 +11,7 @@ import (
 	"github.com/projectdiscovery/gologger"
 )
 
-var defaultCdnProviders = strings.Join(cdncheck.GetDefaultCdnProviders(), ", ")
-var defaultCloudProviders = strings.Join(cdncheck.GetDefaultCloudProviders(), ", ")
-var defaultWafProviders = strings.Join(cdncheck.GetDefaultWafProviders(), ", ")
+var defaultProviders = cdncheck.GetDefaultProviders()
 
 type Output struct {
 	Timestamp time.Time `json:"timestamp,omitempty"`
@@ -99,15 +96,15 @@ func readFlags() (*Options, error) {
 	)
 
 	flagSet.CreateGroup("matchers", "Matchers",
-		flagSet.StringSliceVarP(&opts.matchCdn, "match-cdn", "mcdn", nil, fmt.Sprintf("match host with specified cdn provider (%s)", defaultCdnProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.matchCloud, "match-cloud", "mcloud", nil, fmt.Sprintf("match host with specified cloud provider (%s)", defaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.matchWaf, "match-waf", "mwaf", nil, fmt.Sprintf("match host with specified waf provider (%s)", defaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.matchCdn, "match-cdn", "mcdn", nil, fmt.Sprintf("match host with specified cdn provider (%s)", cdncheck.MapKeys(defaultProviders, "cdn")), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.matchCloud, "match-cloud", "mcloud", nil, fmt.Sprintf("match host with specified cloud provider (%s)", cdncheck.MapKeys(defaultProviders, "cloud")), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.matchWaf, "match-waf", "mwaf", nil, fmt.Sprintf("match host with specified waf provider (%s)", cdncheck.MapKeys(defaultProviders, "waf")), goflags.CommaSeparatedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("filters", "Filters",
-		flagSet.StringSliceVarP(&opts.filterCdn, "filter-cdn", "fcdn", nil, fmt.Sprintf("filter host with specified cdn provider (%s)", defaultCdnProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.filterCloud, "filter-cloud", "fcloud", nil, fmt.Sprintf("filter host with specified cloud provider (%s)", defaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.filterWaf, "filter-waf", "fwaf", nil, fmt.Sprintf("filter host with specified waf provider (%s)", defaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.filterCdn, "filter-cdn", "fcdn", nil, fmt.Sprintf("filter host with specified cdn provider (%s)", cdncheck.MapKeys(defaultProviders, "cdn")), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.filterCloud, "filter-cloud", "fcloud", nil, fmt.Sprintf("filter host with specified cloud provider (%s)", cdncheck.MapKeys(defaultProviders, "cloud")), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.filterWaf, "filter-waf", "fwaf", nil, fmt.Sprintf("filter host with specified waf provider (%s)", cdncheck.MapKeys(defaultProviders, "waf")), goflags.CommaSeparatedStringSliceOptions),
 		flagSet.BoolVarP(&opts.exclude, "exclude", "e", false, "exclude detected ip from output"),
 	)
 

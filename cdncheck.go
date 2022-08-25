@@ -1,6 +1,9 @@
 package cdncheck
 
-import "net"
+import (
+	"net"
+	"strings"
+)
 
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
@@ -55,26 +58,27 @@ func (c *Client) Check(ip net.IP) (matched bool, value string, itemType string, 
 }
 
 // GetDefaultProviders exports default providers
-func GetDefaultCdnProviders() []string {
+func GetDefaultProviders() map[string][]string {
+	var providers = make(map[string][]string)
 	var provider []string
 	for k := range generatedData.CDN {
 		provider = append(provider, k)
 	}
-	return provider
-}
-
-func GetDefaultCloudProviders() []string {
-	var provider []string
+	providers["cdn"] = provider
+	provider = nil
 	for k := range generatedData.Cloud {
 		provider = append(provider, k)
 	}
-	return provider
-}
-
-func GetDefaultWafProviders() []string {
-	var provider []string
+	providers["cloud"] = provider
+	provider = nil
 	for k := range generatedData.WAF {
 		provider = append(provider, k)
 	}
-	return provider
+	providers["waf"] = provider
+	return providers
+}
+func MapKeys(m map[string][]string, key string) string {
+	var keys []string
+	keys = append(keys, m[key]...)
+	return strings.Join(keys, ", ")
 }
