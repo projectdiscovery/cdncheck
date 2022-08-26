@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/ipinfo/go/v2 v2.7.0
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.19 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/fileutil v0.0.0-20220705195237-01becc2a8963
