@@ -1,6 +1,6 @@
 module github.com/projectdiscovery/cdncheck
 
-go 1.14
+go 1.16
 
 require (
 	github.com/ipinfo/go/v2 v2.7.0
