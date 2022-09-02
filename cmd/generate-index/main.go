@@ -14,7 +14,7 @@ import (
 
 var (
 	input  = flag.String("input", "input.yaml", "input.yaml file for processing")
-	output = flag.String("output", "cidr_data.go", "output file for generated cidrs")
+	output = flag.String("output", "cidr_data.json", "output file for generated cidrs")
 	token  = flag.String("token", "", "Token for the ipinfo service")
 )
 
@@ -49,17 +49,29 @@ func process() error {
 	}
 	defer outputFile.Close()
 
-	_, _ = outputFile.WriteString("package cdncheck\n\nvar generatedData = &InputCompiled{\n")
+	// function to trim the last comma from an array
+	endOfArray := func(len int) func() string {
+		count := 0
+		return func() string {
+			count++
+			if count == int(len) {
+				return "\n\t\t]\n"
+			}
+			return "\n\t\t],\n"
+		}
+	}
+	_, _ = outputFile.WriteString("{\n")
 
 	if len(compiled.CDN) > 0 {
 		for provider, items := range compiled.CDN {
 			fmt.Printf("[cdn] Got %d items for %s\n", len(items), provider)
 		}
-		_, _ = outputFile.WriteString("\tCDN: map[string][]string{\n")
+		_, _ = outputFile.WriteString(fmt.Sprintf("\t%q: {\n", "cdn"))
+		eoArray := endOfArray(len(compiled.CDN))
 		for provider, items := range compiled.CDN {
-			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: {\n", provider))
+			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: [\n", provider))
 			_, _ = outputFile.WriteString(joinQuotedString(items, ","))
-			_, _ = outputFile.WriteString("\n\t\t},\n")
+			_, _ = outputFile.WriteString(eoArray())
 		}
 		_, _ = outputFile.WriteString("\t},")
 	}
@@ -68,11 +80,12 @@ func process() error {
 		for provider, items := range compiled.WAF {
 			fmt.Printf("[waf] Got %d items for %s\n", len(items), provider)
 		}
-		_, _ = outputFile.WriteString("\n\tWAF: map[string][]string{\n")
+		_, _ = outputFile.WriteString(fmt.Sprintf("\n\t%q: {\n", "waf"))
+		eoArray := endOfArray(len(compiled.WAF))
 		for provider, items := range compiled.WAF {
-			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: {\n", provider))
+			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: [\n", provider))
 			_, _ = outputFile.WriteString(joinQuotedString(items, ","))
-			_, _ = outputFile.WriteString("\n\t\t},\n")
+			_, _ = outputFile.WriteString(eoArray())
 		}
 		_, _ = outputFile.WriteString("\t},")
 	}
@@ -81,13 +94,14 @@ func process() error {
 		for provider, items := range compiled.Cloud {
 			fmt.Printf("[cloud] Got %d items for %s\n", len(items), provider)
 		}
-		_, _ = outputFile.WriteString("\n\tCloud: map[string][]string{\n")
+		_, _ = outputFile.WriteString(fmt.Sprintf("\n\t%q: {\n", "cloud"))
+		eoArray := endOfArray(len(compiled.Cloud))
 		for provider, items := range compiled.Cloud {
-			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: {\n", provider))
+			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: [\n", provider))
 			_, _ = outputFile.WriteString(joinQuotedString(items, ","))
-			_, _ = outputFile.WriteString("\n\t\t},\n")
+			_, _ = outputFile.WriteString(eoArray())
 		}
-		_, _ = outputFile.WriteString("\t},")
+		_, _ = outputFile.WriteString("\t}")
 	}
 	_, _ = outputFile.WriteString("\n}\n")
 	return nil
@@ -123,6 +137,5 @@ func joinQuotedString(elems []string, sep string) string {
 		b.WriteString(sep)
 		b.WriteString(fmt.Sprintf("\n%s%q", prefix, s))
 	}
-	b.WriteString(sep)
 	return b.String()
 }
