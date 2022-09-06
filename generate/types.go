@@ -22,3 +22,13 @@ type InputItem struct {
 	// used for checking the provided IP for each input type.
 	CIDR map[string][]string `yaml:"cidr"`
 }
+
+// CidrDataOutput is the output of the generate-index tool
+type CidrDataOutput struct {
+	// CDN contains a list of ranges for CDN cidrs
+	CDN map[string][]string `json:"cdn,omitempty"`
+	// WAF contains a list of ranges for WAF cidrs
+	WAF map[string][]string `json:"waf,omitempty"`
+	// Cloud contains a list of ranges for Cloud cidrs
+	Cloud map[string][]string `json:"cloud,omitempty"`
+}

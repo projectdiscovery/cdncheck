@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -48,62 +49,32 @@ func process() error {
 		return errors.Wrap(err, "could not create output file")
 	}
 	defer outputFile.Close()
-
-	// function to trim the last comma from an array
-	endOfArray := func(len int) func() string {
-		count := 0
-		return func() string {
-			count++
-			if count == int(len) {
-				return "\n\t\t]\n"
-			}
-			return "\n\t\t],\n"
-		}
-	}
-	_, _ = outputFile.WriteString("{\n")
-
+	data := generate.CidrDataOutput{}
 	if len(compiled.CDN) > 0 {
 		for provider, items := range compiled.CDN {
 			fmt.Printf("[cdn] Got %d items for %s\n", len(items), provider)
 		}
-		_, _ = outputFile.WriteString(fmt.Sprintf("\t%q: {\n", "cdn"))
-		eoArray := endOfArray(len(compiled.CDN))
-		for provider, items := range compiled.CDN {
-			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: [\n", provider))
-			_, _ = outputFile.WriteString(joinQuotedString(items, ","))
-			_, _ = outputFile.WriteString(eoArray())
-		}
-		_, _ = outputFile.WriteString("\t},")
+		data.CDN = compiled.CDN
 	}
 
 	if len(compiled.WAF) > 0 {
 		for provider, items := range compiled.WAF {
 			fmt.Printf("[waf] Got %d items for %s\n", len(items), provider)
 		}
-		_, _ = outputFile.WriteString(fmt.Sprintf("\n\t%q: {\n", "waf"))
-		eoArray := endOfArray(len(compiled.WAF))
-		for provider, items := range compiled.WAF {
-			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: [\n", provider))
-			_, _ = outputFile.WriteString(joinQuotedString(items, ","))
-			_, _ = outputFile.WriteString(eoArray())
-		}
-		_, _ = outputFile.WriteString("\t},")
+		data.WAF = compiled.WAF
 	}
 
 	if len(compiled.Cloud) > 0 {
 		for provider, items := range compiled.Cloud {
 			fmt.Printf("[cloud] Got %d items for %s\n", len(items), provider)
 		}
-		_, _ = outputFile.WriteString(fmt.Sprintf("\n\t%q: {\n", "cloud"))
-		eoArray := endOfArray(len(compiled.Cloud))
-		for provider, items := range compiled.Cloud {
-			_, _ = outputFile.WriteString(fmt.Sprintf("\t\t%q: [\n", provider))
-			_, _ = outputFile.WriteString(joinQuotedString(items, ","))
-			_, _ = outputFile.WriteString(eoArray())
-		}
-		_, _ = outputFile.WriteString("\t}")
+		data.Cloud = compiled.Cloud
 	}
-	_, _ = outputFile.WriteString("\n}\n")
+	jsonData, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return errors.Wrap(err, "could not marshal json")
+	}
+	outputFile.Write(jsonData)
 	return nil
 }
 
