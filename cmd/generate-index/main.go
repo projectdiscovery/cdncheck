@@ -74,7 +74,10 @@ func process() error {
 	if err != nil {
 		return errors.Wrap(err, "could not marshal json")
 	}
-	outputFile.Write(jsonData)
+	_, err = outputFile.Write(jsonData)
+	if err != nil {
+		return errors.Wrap(err, "could not write to output file")
+	}
 	return nil
 }
 
