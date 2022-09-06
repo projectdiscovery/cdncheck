@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck/generate"
@@ -94,22 +93,4 @@ func readCDNInputFile() (*generate.Input, error) {
 		return nil, errors.Wrap(err, "could not decode input.yaml file")
 	}
 	return &inputItem, nil
-}
-
-// joinQuotedString joins strings while quoting them and newline-tabbing them
-func joinQuotedString(elems []string, sep string) string {
-	n := len(sep) * (len(elems) - 1)
-	for i := 0; i < len(elems); i++ {
-		n += len(elems[i])
-	}
-	prefix := "\t\t\t"
-
-	var b strings.Builder
-	b.Grow(n)
-	b.WriteString(fmt.Sprintf("%s%q", prefix, elems[0]))
-	for _, s := range elems[1:] {
-		b.WriteString(sep)
-		b.WriteString(fmt.Sprintf("\n%s%q", prefix, s))
-	}
-	return b.String()
 }
