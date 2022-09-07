@@ -48,26 +48,26 @@ func process() error {
 		return errors.Wrap(err, "could not create output file")
 	}
 	defer outputFile.Close()
-	data := generate.CidrDataOutput{}
+	data := generate.Input{}
 	if len(compiled.CDN) > 0 {
 		for provider, items := range compiled.CDN {
 			fmt.Printf("[cdn] Got %d items for %s\n", len(items), provider)
 		}
-		data.CDN = compiled.CDN
+		data.CDN.CIDR = compiled.CDN
 	}
 
 	if len(compiled.WAF) > 0 {
 		for provider, items := range compiled.WAF {
 			fmt.Printf("[waf] Got %d items for %s\n", len(items), provider)
 		}
-		data.WAF = compiled.WAF
+		data.WAF.CIDR = compiled.WAF
 	}
 
 	if len(compiled.Cloud) > 0 {
 		for provider, items := range compiled.Cloud {
 			fmt.Printf("[cloud] Got %d items for %s\n", len(items), provider)
 		}
-		data.Cloud = compiled.Cloud
+		data.Cloud.CIDR = compiled.Cloud
 	}
 	jsonData, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {

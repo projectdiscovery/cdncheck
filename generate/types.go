@@ -3,11 +3,11 @@ package generate
 // Input is an input for the cdncheck generate tool
 type Input struct {
 	// CDN contains a list of inputs for CDN cidrs
-	CDN *InputItem `yaml:"cdn"`
+	CDN *InputItem `yaml:"cdn" json:"cdn,omitempty"`
 	// WAF contains a list of inputs for WAF cidrs
-	WAF *InputItem `yaml:"waf"`
+	WAF *InputItem `yaml:"waf" json:"waf,omitempty"`
 	// Cloud contains a list of inputs for Cloud cidrs
-	Cloud *InputItem `yaml:"cloud"`
+	Cloud *InputItem `yaml:"cloud" json:"cloud,omitempty"`
 }
 
 // InputItem is a single item from input of cdncheck generate tool
@@ -23,12 +23,3 @@ type InputItem struct {
 	CIDR map[string][]string `yaml:"cidr"`
 }
 
-// CidrDataOutput is the output of the generate-index tool
-type CidrDataOutput struct {
-	// CDN contains a list of ranges for CDN cidrs
-	CDN map[string][]string `json:"cdn,omitempty"`
-	// WAF contains a list of ranges for WAF cidrs
-	WAF map[string][]string `json:"waf,omitempty"`
-	// Cloud contains a list of ranges for Cloud cidrs
-	Cloud map[string][]string `json:"cloud,omitempty"`
-}
