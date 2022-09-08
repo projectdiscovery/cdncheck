@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
+	"github.com/projectdiscovery/cdncheck"
 	"github.com/projectdiscovery/cdncheck/generate"
 	"gopkg.in/yaml.v3"
 )
@@ -48,26 +49,26 @@ func process() error {
 		return errors.Wrap(err, "could not create output file")
 	}
 	defer outputFile.Close()
-	data := generate.Input{}
+	data := cdncheck.InputCompiled{}
 	if len(compiled.CDN) > 0 {
 		for provider, items := range compiled.CDN {
 			fmt.Printf("[cdn] Got %d items for %s\n", len(items), provider)
 		}
-		data.CDN.CIDR = compiled.CDN
+		data.CDN = compiled.CDN
 	}
 
 	if len(compiled.WAF) > 0 {
 		for provider, items := range compiled.WAF {
 			fmt.Printf("[waf] Got %d items for %s\n", len(items), provider)
 		}
-		data.WAF.CIDR = compiled.WAF
+		data.WAF = compiled.WAF
 	}
 
 	if len(compiled.Cloud) > 0 {
 		for provider, items := range compiled.Cloud {
 			fmt.Printf("[cloud] Got %d items for %s\n", len(items), provider)
 		}
-		data.Cloud.CIDR = compiled.Cloud
+		data.Cloud = compiled.Cloud
 	}
 	jsonData, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {

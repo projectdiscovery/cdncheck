@@ -3,11 +3,11 @@ package generate
 // Input is an input for the cdncheck generate tool
 type Input struct {
 	// CDN contains a list of inputs for CDN cidrs
-	CDN *InputItem `yaml:"cdn" json:"cdn,omitempty"`
+	CDN *InputItem `yaml:"cdn"`
 	// WAF contains a list of inputs for WAF cidrs
-	WAF *InputItem `yaml:"waf" json:"waf,omitempty"`
+	WAF *InputItem `yaml:"waf"`
 	// Cloud contains a list of inputs for Cloud cidrs
-	Cloud *InputItem `yaml:"cloud" json:"cloud,omitempty"`
+	Cloud *InputItem `yaml:"cloud"`
 }
 
 // InputItem is a single item from input of cdncheck generate tool
