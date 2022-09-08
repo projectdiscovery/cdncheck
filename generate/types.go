@@ -22,3 +22,4 @@ type InputItem struct {
 	// used for checking the provided IP for each input type.
 	CIDR map[string][]string `yaml:"cidr"`
 }
+

@@ -9,11 +9,11 @@ import (
 // InputCompiled contains a compiled list of input structure
 type InputCompiled struct {
 	// CDN contains a list of ranges for CDN cidrs
-	CDN map[string][]string
+	CDN map[string][]string `json:"cdn,omitempty"`
 	// WAF contains a list of ranges for WAF cidrs
-	WAF map[string][]string
+	WAF map[string][]string `json:"waf,omitempty"`
 	// Cloud contains a list of ranges for Cloud cidrs
-	Cloud map[string][]string
+	Cloud map[string][]string `json:"cloud,omitempty"`
 }
 
 // providerScraper is a structure for scraping providers
