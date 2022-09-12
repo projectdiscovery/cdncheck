@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"regexp"
 
@@ -23,17 +24,17 @@ func (i *Input) Compile(options *Options) (*cdncheck.InputCompiled, error) {
 	// Fetch input items specified
 	if i.CDN != nil {
 		if err := i.CDN.fetchInputItem(options, compiled.CDN); err != nil {
-			return nil, err
+			log.Printf("[err] could not fetch cdn item: %s\n", err)
 		}
 	}
 	if i.WAF != nil {
 		if err := i.WAF.fetchInputItem(options, compiled.WAF); err != nil {
-			return nil, err
+			log.Printf("[err] could not fetch waf item: %s\n", err)
 		}
 	}
 	if i.Cloud != nil {
 		if err := i.Cloud.fetchInputItem(options, compiled.Cloud); err != nil {
-			return nil, err
+			log.Printf("[err] could not fetch cloud item: %s\n", err)
 		}
 	}
 
@@ -53,7 +54,7 @@ func (i *Input) Compile(options *Options) (*cdncheck.InputCompiled, error) {
 		}
 		for _, item := range scraper {
 			if response, err := item.scraper(options.HTTP()); err != nil {
-				return nil, fmt.Errorf("could not scrape %s: %s", item.name, err)
+				log.Printf("[err] could not scrape %s item: %s\n", item.name, err)
 			} else {
 				data[item.name] = response
 			}
