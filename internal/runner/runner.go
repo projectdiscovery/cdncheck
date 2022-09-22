@@ -10,7 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/mapcidr"
+	"github.com/projectdiscovery/urlutil"
 )
 
 type Runner struct {
@@ -111,29 +113,44 @@ func processInputItem(input string, options *Options, cdnclient *cdncheck.Client
 			return
 		}
 		for cidr := range cidrInputs {
-			processInputItemSingle(cidr, options, cdnclient, output)
+			processInputItemSingle(input, "", cidr, options, cdnclient, output)
 		}
 	} else {
 		// Normal input
-		processInputItemSingle(input, options, cdnclient, output)
+		url, err := urlutil.Parse(input)
+		if err != nil {
+			gologger.Error().Msgf("Could not parse address %s: %s", input, err)
+			return
+		}
+		if iputil.IsIP(url.Host) {
+			processInputItemSingle(input, "", url.Host, options, cdnclient, output)
+		} else {
+			if ips, err := net.LookupIP(url.Host); err == nil {
+				processInputItemSingle(input, url.Host, ips[0].String(), options, cdnclient, output)
+			} else {
+				gologger.Error().Msgf("Could not find IP for %s: %s", url.Host, err)
+				return
+			}
+		}
 	}
 }
 
-func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
-	parsed := net.ParseIP(item)
+func processInputItemSingle(input string, host string, ip string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
+	parsed := net.ParseIP(ip)
 	if parsed == nil {
-		gologger.Error().Msgf("Could not parse IP address: %s", item)
+		gologger.Error().Msgf("Could not parse IP address: %s", ip)
 		return
 	}
 	isCDN, provider, itemType, err := cdnclient.Check(parsed)
 	if err != nil {
-		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
+		gologger.Error().Msgf("Could not check IP cdn %s: %s", ip, err)
 		return
 	}
-
 	data := Output{
 		Timestamp: time.Now(),
-		IP:        item,
+		Input:     input,
+		Host:      host,
+		IP:        ip,
 		itemType:  itemType,
 	}
 	if options.exclude {

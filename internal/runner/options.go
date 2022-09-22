@@ -11,9 +11,10 @@ import (
 	"github.com/projectdiscovery/gologger"
 )
 
-
 type Output struct {
 	Timestamp time.Time `json:"timestamp,omitempty"`
+	Input     string    `json:"input,omitempty"`
+	Host      string    `json:"host,omitempty"`
 	IP        string    `json:"ip"`
 	Cdn       bool      `json:"cdn,omitempty"`
 	CdnName   string    `json:"cdn_name,omitempty"`
@@ -34,7 +35,7 @@ func (o *Output) String() string {
 	case "waf":
 		commonName = o.WafName
 	}
-	return fmt.Sprintf("%s [%s] [%s]", o.IP, o.itemType, commonName)
+	return fmt.Sprintf("%s [%s] [%s]", o.Input, o.itemType, commonName)
 }
 func (o *Output) StringIP() string {
 	return o.IP
