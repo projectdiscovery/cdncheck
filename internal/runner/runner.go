@@ -10,9 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
 	"github.com/projectdiscovery/gologger"
-	"github.com/projectdiscovery/iputil"
 	"github.com/projectdiscovery/mapcidr"
-	"github.com/projectdiscovery/urlutil"
+	iputil "github.com/projectdiscovery/utils/ip"
+	urlutil "github.com/projectdiscovery/utils/url"
 )
 
 type Runner struct {
