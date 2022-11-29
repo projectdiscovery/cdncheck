@@ -11,24 +11,33 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    target-branch: "dev"
     commit-message:
       prefix: "chore"
       include: "scope"
+    labels:
+      - "Type: Maintenance"
 
-  # Maintain dependencies for go modules
+   # Maintain dependencies for go modules
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    target-branch: "dev"
     commit-message:
       prefix: "chore"
       include: "scope"
+    labels:
+      - "Type: Maintenance"
 
   # Maintain dependencies for docker
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    target-branch: "dev"
     commit-message:
       prefix: "chore"
       include: "scope"
+    labels:
+      - "Type: Maintenance"
