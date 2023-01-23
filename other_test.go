@@ -6,15 +6,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCheckCNAME(t *testing.T) {
+func TestCheckSuffix(t *testing.T) {
 	client := New()
 
-	valid, provider, err := client.CheckCNAME([]string{"test.cloudfront.net"})
+	valid, provider, err := client.CheckSuffix("test.cloudfront.net")
 	require.Nil(t, err, "could not check cname")
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "amazon", provider, "could not get correct provider")
 
-	valid, _, err = client.CheckCNAME([]string{"test.provider.net"})
+	valid, _, err = client.CheckSuffix("test.provider.net")
 	require.Nil(t, err, "could not check cname")
 	require.False(t, valid, "could get valid cname")
 }

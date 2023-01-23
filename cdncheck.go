@@ -3,6 +3,7 @@ package cdncheck
 import (
 	"net"
 	"strings"
+	"sync"
 )
 
 var (
@@ -14,6 +15,7 @@ var (
 // Client checks for CDN based IPs which should be excluded
 // during scans since they belong to third party firewalls.
 type Client struct {
+	*sync.Once
 	cdn   *providerScraper
 	waf   *providerScraper
 	cloud *providerScraper

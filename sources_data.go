@@ -3,17 +3,16 @@ package cdncheck
 import (
 	_ "embed"
 	"encoding/json"
-
-	"github.com/projectdiscovery/gologger"
+	"fmt"
 )
 
-//go:embed cidr_data.json
+//go:embed sources_data.json
 var data string
 
 var generatedData InputCompiled
 
 func init() {
 	if err := json.Unmarshal([]byte(data), &generatedData); err != nil {
-		gologger.Fatal().Msgf("Could not parse cidr data: %s", err)
+		panic(fmt.Sprintf("Could not parse cidr data: %s", err))
 	}
 }

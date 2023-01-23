@@ -27,7 +27,7 @@ waf:
   # urls contains a list of URLs for WAF providers
   urls:
     cloudflare:
-      - https://www.cloudflare.com/ips-v4
+      - https://api.cloudflare.com/client/v4/ips
 
 # cloud contains the inputs for cloud CIDR checking
 cloud:
@@ -40,4 +40,25 @@ cloud:
     oracle:
       - https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json
     azure:
-      - https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20221128.json
+      - https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519
+
+
+# common contains common items to all previous categories
+common:
+  fqdn:
+    amazon:
+      - cloudfront.net
+      - amazonaws.com
+    akamai:
+      - edgekey.net
+      - akamaiedge.net
+      - akamaitechnologies.com
+      - akamaihd.net
+    cloudflare:
+    - cloudflare.com
+    fastly:
+      - fastly.net
+    edgecast:
+      - edgecastcdn.net
+    incapsula:
+      - impervadns.net

@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/projectdiscovery/cdncheck"
-	"github.com/projectdiscovery/fileutil"
 	"github.com/projectdiscovery/goflags"
 	"github.com/projectdiscovery/gologger"
+	fileutil "github.com/projectdiscovery/utils/file"
 )
-
 
 type Output struct {
 	Timestamp time.Time `json:"timestamp,omitempty"`
