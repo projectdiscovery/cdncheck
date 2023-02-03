@@ -153,6 +153,92 @@ func scrapeFastly(httpClient *http.Client) ([]string, error) {
 	return cidrs, nil
 }
 
+func scrapeGoogle(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://www.gstatic.com/ipranges/goog.json")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+func scrapeGoogleGCP(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://www.gstatic.com/ipranges/cloud.json")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+func scrapeAmazonAWS(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://ip-ranges.amazonaws.com/ip-ranges.json")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+func scrapeZscaler(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://api.config.zscaler.com/zscaler.net/cenr/json")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
+
+func scrapeOffice365(httpClient *http.Client) ([]string, error) {
+	resp, err := httpClient.Get("https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	body := string(data)
+
+	cidrs := cidrRegex.FindAllString(body, -1)
+	return cidrs, nil
+}
+
 // scrapeLeaseweb scrapes leaseweb firewall's CIDR ranges from ipinfo
 func scrapeLeaseweb(httpClient *http.Client, options *Options) ([]string, error) {
 	req, err := makeReqWithAuth(http.MethodGet, "https://ipinfo.io/AS60626", "Authorization", "Bearer "+options.IPInfoToken)

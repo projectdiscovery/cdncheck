@@ -23,6 +23,11 @@ var defaultScrapers = map[string]scraperFunc{
 	"cloudfront": scrapeCloudFront,
 	"fastly":     scrapeFastly,
 	"incapsula":  scrapeIncapsula,
+	"google":     scrapeGoogle,
+	"gcp":        scrapeGoogleGCP,
+	"amazonaws":  scrapeAmazonAWS,
+	"zscaler":    scrapeZscaler,
+	"office365":  scrapeOffice365,
 }
 
 var defaultScrapersWithOptions = map[string]scraperWithOptionsFunc{
