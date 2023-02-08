@@ -14,6 +14,8 @@ cdn:
       - https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
     fastly:
       - https://api.fastly.com/public-ip-list
+    google:
+      - https://www.gstatic.com/ipranges/goog.json
 
 # waf contains the inputs for WAF CIDR checking
 waf:
@@ -40,7 +42,11 @@ cloud:
     oracle:
       - https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json
     azure:
-      - https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519
+      - https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20221128.json
+    zscaler:
+      - https://api.config.zscaler.com/zscaler.net/cenr/json
+    office365:
+      - https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7
 
 
 # common contains common items to all previous categories
