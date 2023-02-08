@@ -22,12 +22,12 @@ jobs:
       - name: Build CDN Data
         env:
           IPINFO_TOKEN: "${{ secrets.IPINFO_TOKEN }}"
-        run: go run . -output ../../cidr_data.go
+        run: go run . -output ../../sources_data.json
         working-directory: cmd/generate-index
 
       - name: Create local changes
         run: |
-          git add cidr_data.go
+          git add sources_data.json
 
       - name: Commit files
         run: |

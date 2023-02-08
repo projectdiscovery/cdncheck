@@ -29,7 +29,7 @@ waf:
   # urls contains a list of URLs for WAF providers
   urls:
     cloudflare:
-      - https://www.cloudflare.com/ips-v4
+      - https://api.cloudflare.com/client/v4/ips
 
 # cloud contains the inputs for cloud CIDR checking
 cloud:
@@ -47,4 +47,24 @@ cloud:
       - https://api.config.zscaler.com/zscaler.net/cenr/json
     office365:
       - https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7
-      
+
+
+# common contains common items to all previous categories
+common:
+  fqdn:
+    amazon:
+      - cloudfront.net
+      - amazonaws.com
+    akamai:
+      - edgekey.net
+      - akamaiedge.net
+      - akamaitechnologies.com
+      - akamaihd.net
+    cloudflare:
+    - cloudflare.com
+    fastly:
+      - fastly.net
+    edgecast:
+      - edgecastcdn.net
+    incapsula:
+      - impervadns.net

@@ -7,19 +7,7 @@ import (
 	"github.com/weppos/publicsuffix-go/publicsuffix"
 )
 
-// cdnCnameDomains contains a map of CNAME to domains to cdns
-var cdnCnameDomains = map[string]string{
-	"cloudfront.net":         "amazon",
-	"amazonaws.com":          "amazon",
-	"edgekey.net":            "akamai",
-	"akamaiedge.net":         "akamai",
-	"akamaitechnologies.com": "akamai",
-	"akamaihd.net":           "akamai",
-	"cloudflare.com":         "cloudflare",
-	"fastly.net":             "fastly",
-	"edgecastcdn.net":        "edgecast",
-	"impervadns.net":         "incapsula",
-}
+var suffixToSource map[string]string
 
 // cdnWappalyzerTechnologies contains a map of wappalyzer technologies to cdns
 var cdnWappalyzerTechnologies = map[string]string{
@@ -30,18 +18,26 @@ var cdnWappalyzerTechnologies = map[string]string{
 	"akamai":     "akamai",
 }
 
-// CheckCNAME checks if the CNAMEs are a part of CDN
-func (c *Client) CheckCNAME(cnames []string) (bool, string, error) {
-	for _, cname := range cnames {
-		parsed, err := publicsuffix.Parse(cname)
-		if err != nil {
-			return false, "", errors.Wrap(err, "could not parse cname domain")
+// CheckFQDN checks if fqdns are known cloud ones
+func (c *Client) CheckSuffix(fqdns ...string) (bool, string, error) {
+	c.Once.Do(func() {
+		suffixToSource = make(map[string]string)
+		for source, suffixes := range generatedData.Common {
+			for _, suffix := range suffixes {
+				suffixToSource[suffix] = source
+			}
 		}
-		if discovered, ok := cdnCnameDomains[parsed.TLD]; ok {
+	})
+	for _, fqdn := range fqdns {
+		parsed, err := publicsuffix.Parse(fqdn)
+		if err != nil {
+			return false, "", errors.Wrap(err, "could not parse fqdn")
+		}
+		if discovered, ok := suffixToSource[parsed.TLD]; ok {
 			return true, discovered, nil
 		}
 		domain := parsed.SLD + "." + parsed.TLD
-		if discovered, ok := cdnCnameDomains[domain]; ok {
+		if discovered, ok := suffixToSource[domain]; ok {
 			return true, discovered, nil
 		}
 	}

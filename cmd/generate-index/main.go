@@ -15,7 +15,7 @@ import (
 
 var (
 	input  = flag.String("input", "input.yaml", "input.yaml file for processing")
-	output = flag.String("output", "cidr_data.json", "output file for generated cidrs")
+	output = flag.String("output", "sources_data.json", "output file for generated sources")
 	token  = flag.String("token", "", "Token for the ipinfo service")
 )
 
@@ -28,28 +28,35 @@ func main() {
 }
 
 func process() error {
-	input, err := readCDNInputFile()
-	if err != nil {
-		return err
-	}
 	options := &generate.Options{}
 	options.ParseFromEnv()
 	if *token != "" && options.IPInfoToken == "" {
 		options.IPInfoToken = *token
 	}
 
-	compiled, err := input.Compile(options)
+	categories, err := parseCategoriesFromFile()
 	if err != nil {
 		return err
 	}
-	// Print compiled details
+
+	compiled, err := categories.Compile(options)
+	if err != nil {
+		return err
+	}
 
 	outputFile, err := os.Create(*output)
 	if err != nil {
 		return errors.Wrap(err, "could not create output file")
 	}
 	defer outputFile.Close()
+
 	data := cdncheck.InputCompiled{}
+	if len(compiled.Common) > 0 {
+		for provider, items := range compiled.Common {
+			fmt.Printf("[common/fqdn] Defined %d items for %s\n", len(items), provider)
+		}
+		data.Common = compiled.Common
+	}
 	if len(compiled.CDN) > 0 {
 		for provider, items := range compiled.CDN {
 			fmt.Printf("[cdn] Got %d items for %s\n", len(items), provider)
@@ -70,7 +77,7 @@ func process() error {
 		}
 		data.Cloud = compiled.Cloud
 	}
-	jsonData, err := json.MarshalIndent(data, "", "\t")
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return errors.Wrap(err, "could not marshal json")
 	}
@@ -81,17 +88,16 @@ func process() error {
 	return nil
 }
 
-func readCDNInputFile() (*generate.Input, error) {
-	var inputItem generate.Input
-
+func parseCategoriesFromFile() (*generate.Categories, error) {
 	file, err := os.Open(*input)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not read input.yaml file")
 	}
 	defer file.Close()
 
-	if err := yaml.NewDecoder(file).Decode(&inputItem); err != nil {
+	categories := &generate.Categories{}
+	if err := yaml.NewDecoder(file).Decode(categories); err != nil {
 		return nil, errors.Wrap(err, "could not decode input.yaml file")
 	}
-	return &inputItem, nil
+	return categories, nil
 }

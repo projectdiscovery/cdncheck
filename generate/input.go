@@ -1,41 +1,49 @@
 package generate
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/ipinfo/go/v2/ipinfo"
 	"github.com/projectdiscovery/cdncheck"
+	stringsutil "github.com/projectdiscovery/utils/strings"
 )
 
 var cidrRegex = regexp.MustCompile(`[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[0-9]{1,3}`)
 
 // Compile returns the compiled form of an input structure
-func (i *Input) Compile(options *Options) (*cdncheck.InputCompiled, error) {
+func (c *Categories) Compile(options *Options) (*cdncheck.InputCompiled, error) {
 	compiled := &cdncheck.InputCompiled{
-		CDN:   make(map[string][]string),
-		WAF:   make(map[string][]string),
-		Cloud: make(map[string][]string),
+		CDN:    make(map[string][]string),
+		WAF:    make(map[string][]string),
+		Cloud:  make(map[string][]string),
+		Common: make(map[string][]string),
 	}
 	// Fetch input items specified
-	if i.CDN != nil {
-		if err := i.CDN.fetchInputItem(options, compiled.CDN); err != nil {
+	if c.CDN != nil {
+		if err := c.CDN.fetchInputItem(options, compiled.CDN); err != nil {
 			log.Printf("[err] could not fetch cdn item: %s\n", err)
 		}
 	}
-	if i.WAF != nil {
-		if err := i.WAF.fetchInputItem(options, compiled.WAF); err != nil {
+	if c.WAF != nil {
+		if err := c.WAF.fetchInputItem(options, compiled.WAF); err != nil {
 			log.Printf("[err] could not fetch waf item: %s\n", err)
 		}
 	}
-	if i.Cloud != nil {
-		if err := i.Cloud.fetchInputItem(options, compiled.Cloud); err != nil {
+	if c.Cloud != nil {
+		if err := c.Cloud.fetchInputItem(options, compiled.Cloud); err != nil {
 			log.Printf("[err] could not fetch cloud item: %s\n", err)
 		}
+	}
+	if c.Common != nil {
+		compiled.Common = c.Common.FQDN
 	}
 
 	// Fetch custom scraper data and merge
@@ -53,7 +61,7 @@ func (i *Input) Compile(options *Options) (*cdncheck.InputCompiled, error) {
 			panic(fmt.Sprintf("invalid datatype %s specified", dataType))
 		}
 		for _, item := range scraper {
-			if response, err := item.scraper(options.HTTP()); err != nil {
+			if response, err := item.scraper(http.DefaultClient); err != nil {
 				log.Printf("[err] could not scrape %s item: %s\n", item.name, err)
 			} else {
 				data[item.name] = response
@@ -64,13 +72,13 @@ func (i *Input) Compile(options *Options) (*cdncheck.InputCompiled, error) {
 }
 
 // fetchInputItem fetches input items and writes data to map
-func (i *InputItem) fetchInputItem(options *Options, data map[string][]string) error {
-	for provider, cidrs := range i.CIDR {
+func (c *Category) fetchInputItem(options *Options, data map[string][]string) error {
+	for provider, cidrs := range c.CIDR {
 		data[provider] = cidrs
 	}
-	for provider, urls := range i.URLs {
+	for provider, urls := range c.URLs {
 		for _, item := range urls {
-			if cidrs, err := getCIDRFromURL(options.HTTP(), item); err != nil {
+			if cidrs, err := getCIDRFromURL(item); err != nil {
 				return fmt.Errorf("could not get url %s: %s", item, err)
 			} else {
 				data[provider] = cidrs
@@ -81,9 +89,9 @@ func (i *InputItem) fetchInputItem(options *Options, data map[string][]string) e
 	if !options.HasAuthInfo() {
 		return nil
 	}
-	for provider, asn := range i.ASN {
+	for provider, asn := range c.ASN {
 		for _, item := range asn {
-			if cidrs, err := getIpInfoASN(options.HTTP(), options.IPInfoToken, item); err != nil {
+			if cidrs, err := getIpInfoASN(http.DefaultClient, options.IPInfoToken, item); err != nil {
 				return fmt.Errorf("could not get asn %s: %s", item, err)
 			} else {
 				data[provider] = cidrs
@@ -119,17 +127,42 @@ func getIpInfoASN(httpClient *http.Client, token string, asn string) ([]string, 
 }
 
 // getCIDRFromURL scrapes CIDR ranges for a URL using a regex
-func getCIDRFromURL(httpClient *http.Client, url string) ([]string, error) {
-	resp, err := httpClient.Get(url)
+func getCIDRFromURL(URL string) ([]string, error) {
+	retried := false
+retry:
+	req, err := http.NewRequest(http.MethodGet, URL, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+	// if the body type is not json retry with the first json link in the page
+	unmarshaledData := make(map[string]interface{})
+	if err := json.Unmarshal(data, &unmarshaledData); err != nil && !retried {
+		var extractedURL string
+		docReader, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
+		if err != nil {
+			return nil, err
+		}
+		docReader.Find("a").Each(func(i int, item *goquery.Selection) {
+			src, ok := item.Attr("href")
+			if ok && stringsutil.ContainsAny(src, "ServiceTags_Public_") && extractedURL == "" {
+				extractedURL = src
+			}
+		})
+		URL = extractedURL
+		retried = true
+		goto retry
+	}
+
 	body := string(data)
 
 	cidrs := cidrRegex.FindAllString(body, -1)
