@@ -84,7 +84,7 @@ func (r *Runner) waitForData(output chan Output, writer *OutputWriter, wg *sync.
 			if r.options.response && !r.options.exclude {
 				writer.WriteString(receivedData.String())
 			} else {
-				writer.WriteString(receivedData.StringIP())
+				writer.WriteString(receivedData.Input)
 			}
 		}
 	}
