@@ -32,7 +32,7 @@ func main() {
 
 func runFunctionalTests() error {
 	for _, testcase := range testutils.TestCases {
-		if err := runIndividualTestCase(testcase.Target, testcase.Args, testcase.Expected); err != nil {
+		if err := runIndividualTestCase(testcase); err != nil {
 			errored = true
 			fmt.Fprintf(os.Stderr, "%s Test \"%s\" failed: %s\n", failed, testcase.Target, err)
 		} else {
@@ -42,14 +42,17 @@ func runFunctionalTests() error {
 	return nil
 }
 
-func runIndividualTestCase(target string, args string, expected []string) error {
-	argsParts := strings.Fields(args)
-	devOutput, err := testutils.RunCdncheckBinaryAndGetResults(target, *devCdncheckBinary, debug, argsParts)
+func runIndividualTestCase(testcase testutils.TestCase) error {
+	argsParts := strings.Fields(testcase.Args)
+	devOutput, err := testutils.RunCdncheckBinaryAndGetResults(testcase.Target, *devCdncheckBinary, debug, argsParts)
 	if err != nil {
 		return errors.Wrap(err, "could not run Cdncheck dev test")
 	}
-	if !testutils.CompareOutput(devOutput, expected) {
-		return errors.Errorf("expected output %s, got %s", expected, devOutput)
+	if testcase.CompareFunc != nil {
+		return testcase.CompareFunc(testcase.Target, devOutput)
+	}
+	if !testutils.CompareOutput(devOutput, testcase.Expected) {
+		return errors.Errorf("expected output %s, got %s", testcase.Expected, devOutput)
 	}
 	return nil
 }
