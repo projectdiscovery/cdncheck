@@ -9,8 +9,12 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
+	"github.com/projectdiscovery/fastdialer/fastdialer"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/mapcidr"
+	errorutils "github.com/projectdiscovery/utils/errors"
+	iputils "github.com/projectdiscovery/utils/ip"
+	urlutils "github.com/projectdiscovery/utils/url"
 )
 
 type Runner struct {
@@ -107,12 +111,23 @@ func processInputItem(input string, options *Options, cdnclient *cdncheck.Client
 	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
 		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
 		if err != nil {
-			gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+			if options.debug {
+				gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+			}
 			return
 		}
 		for cidr := range cidrInputs {
 			processInputItemSingle(cidr, options, cdnclient, output)
 		}
+	} else if !iputils.IsIP(input) { //domain/url input
+		ipAddr, err := resolveToIP(input)
+		if err != nil {
+			if options.debug {
+				gologger.Error().Msgf("Could not parse domain/url %s: %s", input, err)
+			}
+			return
+		}
+		processInputItemSingle(ipAddr, options, cdnclient, output)
 	} else {
 		// Normal input
 		processInputItemSingle(input, options, cdnclient, output)
@@ -237,4 +252,24 @@ func filterIP(options *Options, data Output) bool {
 		}
 	}
 	return false
+}
+
+func resolveToIP(domain string) (string, error) {
+	url, err := urlutils.Parse(domain)
+	if err != nil {
+		return domain, err
+	}
+	Options := fastdialer.DefaultOptions
+	dailer, err := fastdialer.NewDialer(Options)
+	if err != nil {
+		return domain, errorutils.New("%v: fialed to resolve domain", err.Error())
+	}
+	dsnData, err := dailer.GetDNSData(url.Host)
+	if err != nil {
+		return domain, err
+	}
+	if len(dsnData.A) < 1 {
+		return domain, errorutils.New("fialed to resolve domain")
+	}
+	return dsnData.A[0], nil
 }

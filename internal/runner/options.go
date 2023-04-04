@@ -51,6 +51,7 @@ type Options struct {
 	cloud       bool
 	waf         bool
 	exclude     bool
+	debug       bool
 	matchCdn    goflags.StringSlice
 	matchCloud  goflags.StringSlice
 	matchWaf    goflags.StringSlice
@@ -91,6 +92,7 @@ func readFlags() (*Options, error) {
 		flagSet.StringVarP(&opts.output, "output", "o", "", "write output in plain format to file"),
 		flagSet.BoolVarP(&opts.version, "version", "", false, "display version of the project"),
 		flagSet.BoolVarP(&opts.json, "json", "", false, "write output in json format to file"),
+		flagSet.BoolVar(&opts.debug, "debug", false, "write output in json format to file"),
 	)
 
 	flagSet.CreateGroup("matchers", "Matchers",
