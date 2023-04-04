@@ -111,23 +111,12 @@ func processInputItem(input string, options *Options, cdnclient *cdncheck.Client
 	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
 		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
 		if err != nil {
-			if options.debug {
-				gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
-			}
+			gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
 			return
 		}
 		for cidr := range cidrInputs {
 			processInputItemSingle(cidr, options, cdnclient, output)
 		}
-	} else if !iputils.IsIP(input) { //domain/url input
-		ipAddr, err := resolveToIP(input)
-		if err != nil {
-			if options.debug {
-				gologger.Error().Msgf("Could not parse domain/url %s: %s", input, err)
-			}
-			return
-		}
-		processInputItemSingle(ipAddr, options, cdnclient, output)
 	} else {
 		// Normal input
 		processInputItemSingle(input, options, cdnclient, output)
@@ -135,6 +124,18 @@ func processInputItem(input string, options *Options, cdnclient *cdncheck.Client
 }
 
 func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
+	data := Output{
+		Input: item,
+	}
+	if !iputils.IsIP(item) {
+		ipAddr, err := resolveToIP(item)
+		if err != nil {
+			gologger.Error().Msgf("Could not parse domain/url %s: %s", item, err)
+			return
+		}
+		item = ipAddr
+	}
+
 	parsed := net.ParseIP(item)
 	if parsed == nil {
 		gologger.Error().Msgf("Could not parse IP address: %s", item)
@@ -145,12 +146,10 @@ func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.C
 		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
 		return
 	}
+	data.itemType = itemType
+	data.IP = item
+	data.Timestamp = time.Now()
 
-	data := Output{
-		Timestamp: time.Now(),
-		IP:        item,
-		itemType:  itemType,
-	}
 	if options.exclude {
 		if !isCDN {
 			output <- data
