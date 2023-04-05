@@ -25,6 +25,9 @@ type Runner struct {
 
 func NewRunner(options *Options) *Runner {
 	fOption := fastdialer.DefaultOptions
+	if len(options.resolvers) > 0 {
+		fOption.BaseResolvers = options.resolvers
+	}
 	fdialer, err := fastdialer.NewDialer(fOption)
 	if err != nil {
 		gologger.Fatal().Msgf("%v: fialed to initialize dailer", err.Error())

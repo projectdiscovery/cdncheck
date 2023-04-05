@@ -34,7 +34,7 @@ func (o *Output) String() string {
 	case "waf":
 		commonName = o.WafName
 	}
-	
+
 	return fmt.Sprintf("%s [%s] [%s]", o.Input, o.itemType, commonName)
 }
 func (o *Output) StringIP() string {
@@ -59,6 +59,7 @@ type Options struct {
 	filterCdn   goflags.StringSlice
 	filterCloud goflags.StringSlice
 	filterWaf   goflags.StringSlice
+	resolvers   goflags.StringSlice
 }
 
 func ParseOptions() *Options {
@@ -106,6 +107,10 @@ func readFlags() (*Options, error) {
 		flagSet.StringSliceVarP(&opts.filterCloud, "filter-cloud", "fcloud", nil, fmt.Sprintf("filter host with specified cloud provider (%s)", cdncheck.DefaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
 		flagSet.StringSliceVarP(&opts.filterWaf, "filter-waf", "fwaf", nil, fmt.Sprintf("filter host with specified waf provider (%s)", cdncheck.DefaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
 		flagSet.BoolVarP(&opts.exclude, "exclude", "e", false, "exclude detected ip from output"),
+	)
+
+	flagSet.CreateGroup("config", "Config",
+		flagSet.StringSliceVarP(&opts.resolvers, "resolver", "r", nil, "list of resolvers to use (file or comma separated)", goflags.CommaSeparatedStringSliceOptions),
 	)
 
 	if err := flagSet.Parse(); err != nil {
