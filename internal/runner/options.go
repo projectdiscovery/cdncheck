@@ -34,7 +34,6 @@ func (o *Output) String() string {
 	case "waf":
 		commonName = o.WafName
 	}
-
 	
 	return fmt.Sprintf("%s [%s] [%s]", o.Input, o.itemType, commonName)
 }
