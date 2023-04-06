@@ -59,7 +59,7 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 	defer wg.Done()
 	defer close(output)
 	for _, target := range r.options.inputs {
-		r.processInputItem(target, r.options, r.cdnclient, output)
+		r.processInputItem(target, output)
 	}
 	if r.options.list != "" {
 		file, err := os.Open(r.options.list)
@@ -72,7 +72,7 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 		for scanner.Scan() {
 			text := scanner.Text()
 			if text != "" {
-				r.processInputItem(text, r.options, r.cdnclient, output)
+				r.processInputItem(text, output)
 			}
 		}
 	}
@@ -81,7 +81,7 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 		for scanner.Scan() {
 			text := scanner.Text()
 			if text != "" {
-				r.processInputItem(text, r.options, r.cdnclient, output)
+				r.processInputItem(text, output)
 			}
 		}
 	}
@@ -119,7 +119,7 @@ func (r *Runner) configureOutput() (*OutputWriter, error) {
 }
 
 // processInputItem processes a single input item
-func (r *Runner) processInputItem(input string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
+func (r *Runner) processInputItem(input string, output chan Output) {
 	// CIDR input
 	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
 		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
@@ -128,15 +128,15 @@ func (r *Runner) processInputItem(input string, options *Options, cdnclient *cdn
 			return
 		}
 		for cidr := range cidrInputs {
-			r.processInputItemSingle(cidr, options, cdnclient, output)
+			r.processInputItemSingle(cidr, output)
 		}
 	} else {
 		// Normal input
-		r.processInputItemSingle(input, options, cdnclient, output)
+		r.processInputItemSingle(input, output)
 	}
 }
 
-func (r *Runner) processInputItemSingle(item string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
+func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	data := Output{
 		Input: item,
 	}
@@ -154,7 +154,7 @@ func (r *Runner) processInputItemSingle(item string, options *Options, cdnclient
 		gologger.Error().Msgf("Could not parse IP address: %s", item)
 		return
 	}
-	isCDN, provider, itemType, err := cdnclient.Check(parsed)
+	isCDN, provider, itemType, err := r.cdnclient.Check(parsed)
 	if err != nil {
 		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
 		return
@@ -163,7 +163,7 @@ func (r *Runner) processInputItemSingle(item string, options *Options, cdnclient
 	data.IP = item
 	data.Timestamp = time.Now()
 
-	if options.exclude {
+	if r.options.exclude {
 		if !isCDN {
 			output <- data
 		}
@@ -180,20 +180,20 @@ func (r *Runner) processInputItemSingle(item string, options *Options, cdnclient
 		data.Waf = isCDN
 		data.WafName = provider
 	}
-	if skipped := filterIP(options, data); skipped {
+	if skipped := filterIP(r.options, data); skipped {
 		return
 	}
-	if matched := matchIP(options, data); !matched {
+	if matched := matchIP(r.options, data); !matched {
 		return
 	}
 	switch {
-	case options.cdn && data.itemType == "cdn",
-		options.cloud && data.itemType == "cloud",
-		options.waf && data.itemType == "waf":
+	case r.options.cdn && data.itemType == "cdn",
+		r.options.cloud && data.itemType == "cloud",
+		r.options.waf && data.itemType == "waf":
 		{
 			output <- data
 		}
-	case (!options.cdn && !options.waf && !options.cloud) && isCDN:
+	case (!r.options.cdn && !r.options.waf && !r.options.cloud) && isCDN:
 		{
 			output <- data
 		}
