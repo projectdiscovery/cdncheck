@@ -53,6 +53,7 @@ type Options struct {
 	cloud       bool
 	waf         bool
 	exclude     bool
+	verbose     bool
 	matchCdn    goflags.StringSlice
 	matchCloud  goflags.StringSlice
 	matchWaf    goflags.StringSlice
@@ -93,6 +94,7 @@ func readFlags() (*Options, error) {
 		flagSet.BoolVarP(&opts.response, "resp", "", false, "display technology name in cli output"),
 		flagSet.StringVarP(&opts.output, "output", "o", "", "write output in plain format to file"),
 		flagSet.BoolVarP(&opts.version, "version", "", false, "display version of the project"),
+		flagSet.BoolVarP(&opts.verbose, "verbose", "v", false, "display verbose output"),
 		flagSet.BoolVarP(&opts.json, "json", "", false, "write output in json format to file"),
 	)
 

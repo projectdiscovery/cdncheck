@@ -24,19 +24,23 @@ type Runner struct {
 }
 
 func NewRunner(options *Options) *Runner {
+	runner := &Runner{
+		options:   options,
+		cdnclient: cdncheck.New(),
+	}
 	fOption := fastdialer.DefaultOptions
 	if len(options.resolvers) > 0 {
 		fOption.BaseResolvers = options.resolvers
 	}
 	fdialer, err := fastdialer.NewDialer(fOption)
 	if err != nil {
-		gologger.Fatal().Msgf("%v: fialed to initialize dailer", err.Error())
+		if options.verbose {
+			gologger.Error().Msgf("%v: fialed to initialize dailer", err.Error())
+		}
+		return runner
 	}
-	return &Runner{
-		options:    options,
-		cdnclient:  cdncheck.New(),
-		fastdialer: fdialer,
-	}
+	runner.fastdialer = fdialer
+	return runner
 }
 
 func (r *Runner) Run() error {
@@ -64,7 +68,10 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 	if r.options.list != "" {
 		file, err := os.Open(r.options.list)
 		if err != nil {
-			gologger.Fatal().Msgf("Could not open input file: %s", err)
+			if r.options.verbose {
+				gologger.Error().Msgf("Could not open input file: %s", err)
+			}
+			return
 		}
 		defer file.Close()
 
@@ -124,7 +131,9 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
 		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
 		if err != nil {
-			gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+			if r.options.verbose {
+				gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+			}
 			return
 		}
 		for cidr := range cidrInputs {
@@ -143,7 +152,9 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	if !iputils.IsIP(item) {
 		ipAddr, err := r.resolveToIP(item)
 		if err != nil {
-			gologger.Error().Msgf("Could not parse domain/url %s: %s", item, err)
+			if r.options.verbose {
+				gologger.Error().Msgf("Could not parse domain/url %s: %s", item, err)
+			}
 			return
 		}
 		item = ipAddr
@@ -151,12 +162,16 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 
 	parsed := net.ParseIP(item)
 	if parsed == nil {
-		gologger.Error().Msgf("Could not parse IP address: %s", item)
+		if r.options.verbose {
+			gologger.Error().Msgf("Could not parse IP address: %s", item)
+		}
 		return
 	}
 	isCDN, provider, itemType, err := r.cdnclient.Check(parsed)
 	if err != nil {
-		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
+		if r.options.verbose {
+			gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
+		}
 		return
 	}
 	data.itemType = itemType
