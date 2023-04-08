@@ -95,7 +95,7 @@ func readFlags() (*Options, error) {
 		flagSet.StringVarP(&opts.output, "output", "o", "", "write output in plain format to file"),
 		flagSet.BoolVarP(&opts.version, "version", "", false, "display version of the project"),
 		flagSet.BoolVarP(&opts.verbose, "verbose", "v", false, "display verbose output"),
-		flagSet.BoolVarP(&opts.json, "json", "", false, "write output in json format to file"),
+		flagSet.BoolVarP(&opts.json, "jsonl", "j", false, "write output in json(line) format"),
 	)
 
 	flagSet.CreateGroup("matchers", "Matchers",
