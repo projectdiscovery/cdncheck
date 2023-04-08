@@ -9,20 +9,38 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
+	"github.com/projectdiscovery/fastdialer/fastdialer"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/mapcidr"
+	errorutils "github.com/projectdiscovery/utils/errors"
+	iputils "github.com/projectdiscovery/utils/ip"
+	urlutils "github.com/projectdiscovery/utils/url"
 )
 
 type Runner struct {
-	options   *Options
-	cdnclient *cdncheck.Client
+	options    *Options
+	cdnclient  *cdncheck.Client
+	fastdialer *fastdialer.Dialer
 }
 
 func NewRunner(options *Options) *Runner {
-	return &Runner{
+	runner := &Runner{
 		options:   options,
 		cdnclient: cdncheck.New(),
 	}
+	fOption := fastdialer.DefaultOptions
+	if len(options.resolvers) > 0 {
+		fOption.BaseResolvers = options.resolvers
+	}
+	fdialer, err := fastdialer.NewDialer(fOption)
+	if err != nil {
+		if options.verbose {
+			gologger.Error().Msgf("%v: fialed to initialize dailer", err.Error())
+		}
+		return runner
+	}
+	runner.fastdialer = fdialer
+	return runner
 }
 
 func (r *Runner) Run() error {
@@ -40,16 +58,20 @@ func (r *Runner) Run() error {
 	wg.Wait()
 	return nil
 }
+
 func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(output)
 	for _, target := range r.options.inputs {
-		processInputItem(target, r.options, r.cdnclient, output)
+		r.processInputItem(target, output)
 	}
 	if r.options.list != "" {
 		file, err := os.Open(r.options.list)
 		if err != nil {
-			gologger.Fatal().Msgf("Could not open input file: %s", err)
+			if r.options.verbose {
+				gologger.Error().Msgf("Could not open input file: %s", err)
+			}
+			return
 		}
 		defer file.Close()
 
@@ -57,7 +79,7 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 		for scanner.Scan() {
 			text := scanner.Text()
 			if text != "" {
-				processInputItem(text, r.options, r.cdnclient, output)
+				r.processInputItem(text, output)
 			}
 		}
 	}
@@ -66,11 +88,12 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 		for scanner.Scan() {
 			text := scanner.Text()
 			if text != "" {
-				processInputItem(text, r.options, r.cdnclient, output)
+				r.processInputItem(text, output)
 			}
 		}
 	}
 }
+
 func (r *Runner) waitForData(output chan Output, writer *OutputWriter, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for receivedData := range output {
@@ -80,11 +103,12 @@ func (r *Runner) waitForData(output chan Output, writer *OutputWriter, wg *sync.
 			if r.options.response && !r.options.exclude {
 				writer.WriteString(receivedData.String())
 			} else {
-				writer.WriteString(receivedData.StringIP())
+				writer.WriteString(receivedData.Input)
 			}
 		}
 	}
 }
+
 func (r *Runner) configureOutput() (*OutputWriter, error) {
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
@@ -102,41 +126,59 @@ func (r *Runner) configureOutput() (*OutputWriter, error) {
 }
 
 // processInputItem processes a single input item
-func processInputItem(input string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
+func (r *Runner) processInputItem(input string, output chan Output) {
 	// CIDR input
 	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
 		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
 		if err != nil {
-			gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+			if r.options.verbose {
+				gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+			}
 			return
 		}
 		for cidr := range cidrInputs {
-			processInputItemSingle(cidr, options, cdnclient, output)
+			r.processInputItemSingle(cidr, output)
 		}
 	} else {
 		// Normal input
-		processInputItemSingle(input, options, cdnclient, output)
+		r.processInputItemSingle(input, output)
 	}
 }
 
-func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.Client, output chan Output) {
-	parsed := net.ParseIP(item)
-	if parsed == nil {
-		gologger.Error().Msgf("Could not parse IP address: %s", item)
-		return
+func (r *Runner) processInputItemSingle(item string, output chan Output) {
+	data := Output{
+		Input: item,
 	}
-	isCDN, provider, itemType, err := cdnclient.Check(parsed)
-	if err != nil {
-		gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
-		return
+	if !iputils.IsIP(item) {
+		ipAddr, err := r.resolveToIP(item)
+		if err != nil {
+			if r.options.verbose {
+				gologger.Error().Msgf("Could not parse domain/url %s: %s", item, err)
+			}
+			return
+		}
+		item = ipAddr
 	}
 
-	data := Output{
-		Timestamp: time.Now(),
-		IP:        item,
-		itemType:  itemType,
+	parsed := net.ParseIP(item)
+	if parsed == nil {
+		if r.options.verbose {
+			gologger.Error().Msgf("Could not parse IP address: %s", item)
+		}
+		return
 	}
-	if options.exclude {
+	isCDN, provider, itemType, err := r.cdnclient.Check(parsed)
+	if err != nil {
+		if r.options.verbose {
+			gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
+		}
+		return
+	}
+	data.itemType = itemType
+	data.IP = item
+	data.Timestamp = time.Now()
+
+	if r.options.exclude {
 		if !isCDN {
 			output <- data
 		}
@@ -153,25 +195,41 @@ func processInputItemSingle(item string, options *Options, cdnclient *cdncheck.C
 		data.Waf = isCDN
 		data.WafName = provider
 	}
-	if skipped := filterIP(options, data); skipped {
+	if skipped := filterIP(r.options, data); skipped {
 		return
 	}
-	if matched := matchIP(options, data); !matched {
+	if matched := matchIP(r.options, data); !matched {
 		return
 	}
 	switch {
-	case options.cdn && data.itemType == "cdn",
-		options.cloud && data.itemType == "cloud",
-		options.waf && data.itemType == "waf":
+	case r.options.cdn && data.itemType == "cdn",
+		r.options.cloud && data.itemType == "cloud",
+		r.options.waf && data.itemType == "waf":
 		{
 			output <- data
 		}
-	case (!options.cdn && !options.waf && !options.cloud) && isCDN:
+	case (!r.options.cdn && !r.options.waf && !r.options.cloud) && isCDN:
 		{
 			output <- data
 		}
 	}
 }
+
+func (r *Runner) resolveToIP(domain string) (string, error) {
+	url, err := urlutils.Parse(domain)
+	if err != nil {
+		return domain, err
+	}
+	dsnData, err := r.fastdialer.GetDNSData(url.Host)
+	if err != nil {
+		return domain, err
+	}
+	if len(dsnData.A) < 1 {
+		return domain, errorutils.New("fialed to resolve domain")
+	}
+	return dsnData.A[0], nil
+}
+
 func matchIP(options *Options, data Output) bool {
 	if len(options.matchCdn) == 0 && len(options.matchCloud) == 0 && len(options.matchWaf) == 0 {
 		return true
@@ -211,6 +269,7 @@ func matchIP(options *Options, data Output) bool {
 	}
 	return false
 }
+
 func filterIP(options *Options, data Output) bool {
 	if len(options.filterCdn) == 0 && len(options.filterCloud) == 0 && len(options.filterWaf) == 0 {
 		return false
