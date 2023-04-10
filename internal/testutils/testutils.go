@@ -30,4 +30,5 @@ var TestCases = []TestCase{
 		}
 		return errorutils.New("expected %v belong to %v cdn but got: %v", target, cdn, got)
 	}},
+	{Target: "2a04:4e42:ff1::169:a86d", Expected: []string{"2a04:4e42:ff1::169:a86d [cdn] [fastly]"}, Args: "-resp"},
 }
