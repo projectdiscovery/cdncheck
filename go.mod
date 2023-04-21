@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/ipinfo/go/v2 v2.9.1
+	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/fastdialer v0.0.24
