@@ -5,13 +5,18 @@ import (
 	"os"
 	"time"
 
+	"github.com/logrusorgru/aurora"
 	"github.com/projectdiscovery/cdncheck"
 	"github.com/projectdiscovery/goflags"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/gologger/formatter"
+	"github.com/projectdiscovery/gologger/levels"
 	fileutil "github.com/projectdiscovery/utils/file"
+	updateutils "github.com/projectdiscovery/utils/update"
 )
 
 type Output struct {
+	aurora    *aurora.Aurora
 	Timestamp time.Time `json:"timestamp,omitempty"`
 	Input     string    `json:"input"`
 	IP        string    `json:"ip"`
@@ -25,42 +30,68 @@ type Output struct {
 }
 
 func (o *Output) String() string {
-	commonName := ""
+	sw := *o.aurora
+	commonName := "[%s]"
+	itemType := fmt.Sprintf("[%s]", o.itemType)
 	switch o.itemType {
 	case "cdn":
-		commonName = o.CdnName
+		commonName = fmt.Sprintf(commonName, o.CdnName)
+		itemType = sw.BrightBlue(itemType).String()
 	case "cloud":
-		commonName = o.CloudName
+		commonName = fmt.Sprintf(commonName, o.CloudName)
+		itemType = sw.BrightGreen(itemType).String()
 	case "waf":
-		commonName = o.WafName
+		commonName = fmt.Sprintf(commonName, o.WafName)
+		itemType = sw.Yellow(itemType).String()
 	}
-
-	return fmt.Sprintf("%s [%s] [%s]", o.Input, o.itemType, commonName)
+	commonName = sw.BrightYellow(commonName).String()
+	return fmt.Sprintf("%s %s %s", o.Input, itemType, commonName)
 }
 func (o *Output) StringIP() string {
 	return o.IP
 }
 
 type Options struct {
-	inputs      goflags.StringSlice
-	list        string
-	response    bool
-	hasStdin    bool
-	output      string
-	version     bool
-	json        bool
-	cdn         bool
-	cloud       bool
-	waf         bool
-	exclude     bool
-	verbose     bool
-	matchCdn    goflags.StringSlice
-	matchCloud  goflags.StringSlice
-	matchWaf    goflags.StringSlice
-	filterCdn   goflags.StringSlice
-	filterCloud goflags.StringSlice
-	filterWaf   goflags.StringSlice
-	resolvers   goflags.StringSlice
+	inputs             goflags.StringSlice
+	list               string
+	response           bool
+	hasStdin           bool
+	output             string
+	version            bool
+	json               bool
+	cdn                bool
+	cloud              bool
+	waf                bool
+	exclude            bool
+	verbose            bool
+	noColor            bool
+	silent             bool
+	debug              bool
+	disableUpdateCheck bool
+	matchCdn           goflags.StringSlice
+	matchCloud         goflags.StringSlice
+	matchWaf           goflags.StringSlice
+	filterCdn          goflags.StringSlice
+	filterCloud        goflags.StringSlice
+	filterWaf          goflags.StringSlice
+	resolvers          goflags.StringSlice
+}
+
+// configureOutput configures the output logging levels to be displayed on the screen
+func configureOutput(options *Options) {
+	if options.silent {
+		gologger.DefaultLogger.SetMaxLevel(levels.LevelSilent)
+	} else if options.verbose {
+		gologger.DefaultLogger.SetMaxLevel(levels.LevelWarning)
+	} else if options.debug {
+		gologger.DefaultLogger.SetMaxLevel(levels.LevelDebug)
+	} else {
+		gologger.DefaultLogger.SetMaxLevel(levels.LevelInfo)
+	}
+
+	if options.noColor {
+		gologger.DefaultLogger.SetFormatter(formatter.NewCLI(true))
+	}
 }
 
 func ParseOptions() *Options {
@@ -90,12 +121,19 @@ func readFlags() (*Options, error) {
 		flagSet.BoolVarP(&opts.waf, "waf", "", false, "display waf ip in cli output"),
 	)
 
+	flagSet.CreateGroup("update", "Update",
+		flagSet.CallbackVarP(GetUpdateCallback(), "update", "up", "update cdncheck to latest version"),
+		flagSet.BoolVarP(&opts.disableUpdateCheck, "disable-update-check", "duc", false, "disable automatic cdncheck update check"),
+	)
+
 	flagSet.CreateGroup("output", "Output",
 		flagSet.BoolVarP(&opts.response, "resp", "", false, "display technology name in cli output"),
 		flagSet.StringVarP(&opts.output, "output", "o", "", "write output in plain format to file"),
 		flagSet.BoolVarP(&opts.version, "version", "", false, "display version of the project"),
 		flagSet.BoolVarP(&opts.verbose, "verbose", "v", false, "display verbose output"),
 		flagSet.BoolVarP(&opts.json, "jsonl", "j", false, "write output in json(line) format"),
+		flagSet.BoolVarP(&opts.noColor, "no-color", "nc", false, "disable colors in cli output"),
+		flagSet.BoolVar(&opts.silent, "silent", false, "only display results in output"),
 	)
 
 	flagSet.CreateGroup("matchers", "Matchers",
@@ -119,8 +157,25 @@ func readFlags() (*Options, error) {
 		gologger.Fatal().Msgf("Could not parse flags: %s", err)
 		os.Exit(0)
 	}
+
+	// configure output option
+	configureOutput(opts)
+	// shows banner
+	showBanner()
+
+	if !opts.disableUpdateCheck {
+		latestVersion, err := updateutils.GetToolVersionCallback("cdncheck", version)()
+		if err != nil {
+			if opts.verbose {
+				gologger.Error().Msgf("cdncheck version check failed: %v", err.Error())
+			}
+		} else {
+			gologger.Info().Msgf("Current cdncheck version %v %v", version, updateutils.GetVersionDescription(version, latestVersion))
+		}
+	}
+
 	if opts.version {
-		gologger.Info().Msgf("Current version: %s", Version)
+		gologger.Info().Msgf("Current version: %s", version)
 		os.Exit(0)
 	}
 	return opts, nil

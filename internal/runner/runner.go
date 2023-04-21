@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/logrusorgru/aurora"
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
 	"github.com/projectdiscovery/fastdialer/fastdialer"
@@ -21,12 +22,15 @@ type Runner struct {
 	options    *Options
 	cdnclient  *cdncheck.Client
 	fastdialer *fastdialer.Dialer
+	aurora     *aurora.Aurora
 }
 
 func NewRunner(options *Options) *Runner {
+	standardWriter := aurora.NewAurora(!options.noColor)
 	runner := &Runner{
 		options:   options,
 		cdnclient: cdncheck.New(),
+		aurora: &standardWriter,
 	}
 	fOption := fastdialer.DefaultOptions
 	if len(options.resolvers) > 0 {
@@ -147,6 +151,7 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 
 func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	data := Output{
+		aurora: r.aurora,
 		Input: item,
 	}
 	if !iputils.IsIP(item) {
