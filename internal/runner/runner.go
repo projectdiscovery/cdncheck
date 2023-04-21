@@ -2,6 +2,7 @@ package runner
 
 import (
 	"bufio"
+	"io"
 	"net"
 	"os"
 	"sync"
@@ -23,22 +24,23 @@ type Runner struct {
 	cdnclient  *cdncheck.Client
 	fastdialer *fastdialer.Dialer
 	aurora     *aurora.Aurora
+	writer     *OutputWriter
 }
 
 func NewRunner(options *Options) *Runner {
-	standardWriter := aurora.NewAurora(!options.noColor)
+	standardWriter := aurora.NewAurora(!options.NoColor)
 	runner := &Runner{
 		options:   options,
 		cdnclient: cdncheck.New(),
-		aurora: &standardWriter,
+		aurora:    &standardWriter,
 	}
 	fOption := fastdialer.DefaultOptions
-	if len(options.resolvers) > 0 {
-		fOption.BaseResolvers = options.resolvers
+	if len(options.Resolvers) > 0 {
+		fOption.BaseResolvers = options.Resolvers
 	}
 	fdialer, err := fastdialer.NewDialer(fOption)
 	if err != nil {
-		if options.verbose {
+		if options.Verbose {
 			gologger.Error().Msgf("%v: fialed to initialize dailer", err.Error())
 		}
 		return runner
@@ -48,31 +50,41 @@ func NewRunner(options *Options) *Runner {
 }
 
 func (r *Runner) Run() error {
-	writer, err := r.configureOutput()
+	err := r.configureOutput()
 	if err != nil {
 		return errors.Wrap(err, "could not configure output")
 	}
-	defer writer.Close()
+	defer r.writer.Close()
 	output := make(chan Output, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
-	go r.process(output, writer, wg)
+	go r.process(output, wg)
 	wg.Add(1)
-	go r.waitForData(output, writer, wg)
+	go r.waitForData(output, wg)
 	wg.Wait()
 	return nil
 }
 
-func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.WaitGroup) {
+func (r *Runner) SetWriter(writer io.Writer) error {
+	outputWriter, err := NewOutputWriter()
+	if err != nil {
+		return err
+	}
+	outputWriter.AddWriters(writer)
+	r.writer = outputWriter
+	return nil
+}
+
+func (r *Runner) process(output chan Output, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(output)
-	for _, target := range r.options.inputs {
+	for _, target := range r.options.Inputs {
 		r.processInputItem(target, output)
 	}
-	if r.options.list != "" {
-		file, err := os.Open(r.options.list)
+	if r.options.List != "" {
+		file, err := os.Open(r.options.List)
 		if err != nil {
-			if r.options.verbose {
+			if r.options.Verbose {
 				gologger.Error().Msgf("Could not open input file: %s", err)
 			}
 			return
@@ -87,7 +99,7 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 			}
 		}
 	}
-	if r.options.hasStdin {
+	if r.options.HasStdin {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			text := scanner.Text()
@@ -98,35 +110,46 @@ func (r *Runner) process(output chan Output, writer *OutputWriter, wg *sync.Wait
 	}
 }
 
-func (r *Runner) waitForData(output chan Output, writer *OutputWriter, wg *sync.WaitGroup) {
+func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for receivedData := range output {
-		if r.options.json {
-			writer.WriteJSON(receivedData)
+		if r.options.OnResult != nil {
+			r.options.OnResult(receivedData)
+		}
+		if r.options.Json {
+			r.writer.WriteJSON(receivedData)
 		} else {
-			if r.options.response && !r.options.exclude {
-				writer.WriteString(receivedData.String())
+			if r.options.Response && !r.options.Exclude {
+				r.writer.WriteString(receivedData.String())
 			} else {
-				writer.WriteString(receivedData.Input)
+				r.writer.WriteString(receivedData.Input)
 			}
 		}
 	}
 }
 
-func (r *Runner) configureOutput() (*OutputWriter, error) {
+func (r *Runner) configureOutput() error {
+	if r.writer != nil {
+		return nil
+	}
 	outputWriter, err := NewOutputWriter()
 	if err != nil {
-		return nil, err
+		return err
+	}
+	if r.options.OnResult != nil {
+		r.writer = outputWriter
+		return nil
 	}
 	outputWriter.AddWriters(os.Stdout)
-	if r.options.output != "" {
-		outputFile, err := os.Create(r.options.output)
+	if r.options.Output != "" {
+		outputFile, err := os.Create(r.options.Output)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		outputWriter.AddWriters(outputFile)
 	}
-	return outputWriter, nil
+	r.writer = outputWriter
+	return nil
 }
 
 // processInputItem processes a single input item
@@ -135,7 +158,7 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
 		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
 		if err != nil {
-			if r.options.verbose {
+			if r.options.Verbose {
 				gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
 			}
 			return
@@ -152,12 +175,12 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	data := Output{
 		aurora: r.aurora,
-		Input: item,
+		Input:  item,
 	}
 	if !iputils.IsIP(item) {
 		ipAddr, err := r.resolveToIP(item)
 		if err != nil {
-			if r.options.verbose {
+			if r.options.Verbose {
 				gologger.Error().Msgf("Could not parse domain/url %s: %s", item, err)
 			}
 			return
@@ -167,14 +190,14 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 
 	parsed := net.ParseIP(item)
 	if parsed == nil {
-		if r.options.verbose {
+		if r.options.Verbose {
 			gologger.Error().Msgf("Could not parse IP address: %s", item)
 		}
 		return
 	}
 	isCDN, provider, itemType, err := r.cdnclient.Check(parsed)
 	if err != nil {
-		if r.options.verbose {
+		if r.options.Verbose {
 			gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
 		}
 		return
@@ -183,7 +206,7 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	data.IP = item
 	data.Timestamp = time.Now()
 
-	if r.options.exclude {
+	if r.options.Exclude {
 		if !isCDN {
 			output <- data
 		}
@@ -207,13 +230,13 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		return
 	}
 	switch {
-	case r.options.cdn && data.itemType == "cdn",
-		r.options.cloud && data.itemType == "cloud",
-		r.options.waf && data.itemType == "waf":
+	case r.options.Cdn && data.itemType == "cdn",
+		r.options.Cloud && data.itemType == "cloud",
+		r.options.Waf && data.itemType == "waf":
 		{
 			output <- data
 		}
-	case (!r.options.cdn && !r.options.waf && !r.options.cloud) && isCDN:
+	case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && isCDN:
 		{
 			output <- data
 		}
@@ -236,12 +259,12 @@ func (r *Runner) resolveToIP(domain string) (string, error) {
 }
 
 func matchIP(options *Options, data Output) bool {
-	if len(options.matchCdn) == 0 && len(options.matchCloud) == 0 && len(options.matchWaf) == 0 {
+	if len(options.MatchCdn) == 0 && len(options.MatchCloud) == 0 && len(options.MatchWaf) == 0 {
 		return true
 	}
-	if len(options.matchCdn) > 0 && data.itemType == "cdn" {
+	if len(options.MatchCdn) > 0 && data.itemType == "cdn" {
 		matched := false
-		for _, filter := range options.matchCdn {
+		for _, filter := range options.MatchCdn {
 			if filter == data.CdnName {
 				matched = true
 			}
@@ -250,9 +273,9 @@ func matchIP(options *Options, data Output) bool {
 			return true
 		}
 	}
-	if len(options.matchCloud) > 0 && data.itemType == "cloud" {
+	if len(options.MatchCloud) > 0 && data.itemType == "cloud" {
 		matched := false
-		for _, filter := range options.matchCloud {
+		for _, filter := range options.MatchCloud {
 			if filter == data.CloudName {
 				matched = true
 			}
@@ -261,9 +284,9 @@ func matchIP(options *Options, data Output) bool {
 			return true
 		}
 	}
-	if len(options.matchWaf) > 0 && data.itemType == "waf" {
+	if len(options.MatchWaf) > 0 && data.itemType == "waf" {
 		matched := false
-		for _, filter := range options.matchWaf {
+		for _, filter := range options.MatchWaf {
 			if filter == data.WafName {
 				matched = true
 			}
@@ -276,25 +299,25 @@ func matchIP(options *Options, data Output) bool {
 }
 
 func filterIP(options *Options, data Output) bool {
-	if len(options.filterCdn) == 0 && len(options.filterCloud) == 0 && len(options.filterWaf) == 0 {
+	if len(options.FilterCdn) == 0 && len(options.FilterCloud) == 0 && len(options.FilterWaf) == 0 {
 		return false
 	}
-	if len(options.filterCdn) > 0 && data.itemType == "cdn" {
-		for _, filter := range options.filterCdn {
+	if len(options.FilterCdn) > 0 && data.itemType == "cdn" {
+		for _, filter := range options.FilterCdn {
 			if filter == data.CdnName {
 				return true
 			}
 		}
 	}
-	if len(options.filterCloud) > 0 && data.itemType == "cloud" {
-		for _, filter := range options.filterCloud {
+	if len(options.FilterCloud) > 0 && data.itemType == "cloud" {
+		for _, filter := range options.FilterCloud {
 			if filter == data.CloudName {
 				return true
 			}
 		}
 	}
-	if len(options.filterWaf) > 0 && data.itemType == "waf" {
-		for _, filter := range options.filterWaf {
+	if len(options.FilterWaf) > 0 && data.itemType == "waf" {
+		for _, filter := range options.FilterWaf {
 			if filter == data.WafName {
 				return true
 			}

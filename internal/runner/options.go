@@ -52,44 +52,45 @@ func (o *Output) StringIP() string {
 }
 
 type Options struct {
-	inputs             goflags.StringSlice
-	list               string
-	response           bool
-	hasStdin           bool
-	output             string
-	version            bool
-	json               bool
-	cdn                bool
-	cloud              bool
-	waf                bool
-	exclude            bool
-	verbose            bool
-	noColor            bool
-	silent             bool
-	debug              bool
-	disableUpdateCheck bool
-	matchCdn           goflags.StringSlice
-	matchCloud         goflags.StringSlice
-	matchWaf           goflags.StringSlice
-	filterCdn          goflags.StringSlice
-	filterCloud        goflags.StringSlice
-	filterWaf          goflags.StringSlice
-	resolvers          goflags.StringSlice
+	Inputs             goflags.StringSlice
+	List               string
+	Response           bool
+	HasStdin           bool
+	Output             string
+	Version            bool
+	Json               bool
+	Cdn                bool
+	Cloud              bool
+	Waf                bool
+	Exclude            bool
+	Verbose            bool
+	NoColor            bool
+	Silent             bool
+	Debug              bool
+	DisableUpdateCheck bool
+	MatchCdn           goflags.StringSlice
+	MatchCloud         goflags.StringSlice
+	MatchWaf           goflags.StringSlice
+	FilterCdn          goflags.StringSlice
+	FilterCloud        goflags.StringSlice
+	FilterWaf          goflags.StringSlice
+	Resolvers          goflags.StringSlice
+	OnResult           func(r Output)
 }
 
 // configureOutput configures the output logging levels to be displayed on the screen
 func configureOutput(options *Options) {
-	if options.silent {
+	if options.Silent {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelSilent)
-	} else if options.verbose {
+	} else if options.Verbose {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelWarning)
-	} else if options.debug {
+	} else if options.Debug {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelDebug)
 	} else {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelInfo)
 	}
 
-	if options.noColor {
+	if options.NoColor {
 		gologger.DefaultLogger.SetFormatter(formatter.NewCLI(true))
 	}
 }
@@ -105,52 +106,52 @@ func ParseOptions() *Options {
 // readFlags reads the flags and options for the utility
 func readFlags() (*Options, error) {
 	opts := &Options{}
-	opts.hasStdin = fileutil.HasStdin()
+	opts.HasStdin = fileutil.HasStdin()
 
 	flagSet := goflags.NewFlagSet()
 	flagSet.SetDescription("cdncheck is a tool for identifying the technology associated with ip network addresses.")
 
 	flagSet.CreateGroup("input", "Input",
-		flagSet.StringSliceVarP(&opts.inputs, "inputs", "i", nil, "inputs to process", goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringVarP(&opts.list, "list", "l", "", "file with inputs to process"),
+		flagSet.StringSliceVarP(&opts.Inputs, "inputs", "i", nil, "inputs to process", goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringVarP(&opts.List, "list", "l", "", "file with inputs to process"),
 	)
 
 	flagSet.CreateGroup("detection", "Detection",
-		flagSet.BoolVarP(&opts.cdn, "cdn", "", false, "display cdn ip in cli output"),
-		flagSet.BoolVarP(&opts.cloud, "cloud", "", false, "display cloud ip in cli output"),
-		flagSet.BoolVarP(&opts.waf, "waf", "", false, "display waf ip in cli output"),
+		flagSet.BoolVarP(&opts.Cdn, "cdn", "", false, "display cdn ip in cli output"),
+		flagSet.BoolVarP(&opts.Cloud, "cloud", "", false, "display cloud ip in cli output"),
+		flagSet.BoolVarP(&opts.Waf, "waf", "", false, "display waf ip in cli output"),
 	)
 
 	flagSet.CreateGroup("update", "Update",
 		flagSet.CallbackVarP(GetUpdateCallback(), "update", "up", "update cdncheck to latest version"),
-		flagSet.BoolVarP(&opts.disableUpdateCheck, "disable-update-check", "duc", false, "disable automatic cdncheck update check"),
+		flagSet.BoolVarP(&opts.DisableUpdateCheck, "disable-update-check", "duc", false, "disable automatic cdncheck update check"),
 	)
 
 	flagSet.CreateGroup("output", "Output",
-		flagSet.BoolVarP(&opts.response, "resp", "", false, "display technology name in cli output"),
-		flagSet.StringVarP(&opts.output, "output", "o", "", "write output in plain format to file"),
-		flagSet.BoolVarP(&opts.version, "version", "", false, "display version of the project"),
-		flagSet.BoolVarP(&opts.verbose, "verbose", "v", false, "display verbose output"),
-		flagSet.BoolVarP(&opts.json, "jsonl", "j", false, "write output in json(line) format"),
-		flagSet.BoolVarP(&opts.noColor, "no-color", "nc", false, "disable colors in cli output"),
-		flagSet.BoolVar(&opts.silent, "silent", false, "only display results in output"),
+		flagSet.BoolVarP(&opts.Response, "resp", "", false, "display technology name in cli output"),
+		flagSet.StringVarP(&opts.Output, "output", "o", "", "write output in plain format to file"),
+		flagSet.BoolVarP(&opts.Version, "version", "", false, "display version of the project"),
+		flagSet.BoolVarP(&opts.Verbose, "verbose", "v", false, "display verbose output"),
+		flagSet.BoolVarP(&opts.Json, "jsonl", "j", false, "write output in json(line) format"),
+		flagSet.BoolVarP(&opts.NoColor, "no-color", "nc", false, "disable colors in cli output"),
+		flagSet.BoolVar(&opts.Silent, "silent", false, "only display results in output"),
 	)
 
 	flagSet.CreateGroup("matchers", "Matchers",
-		flagSet.StringSliceVarP(&opts.matchCdn, "match-cdn", "mcdn", nil, fmt.Sprintf("match host with specified cdn provider (%s)", cdncheck.DefaultCDNProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.matchCloud, "match-cloud", "mcloud", nil, fmt.Sprintf("match host with specified cloud provider (%s)", cdncheck.DefaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.matchWaf, "match-waf", "mwaf", nil, fmt.Sprintf("match host with specified waf provider (%s)", cdncheck.DefaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.MatchCdn, "match-cdn", "mcdn", nil, fmt.Sprintf("match host with specified cdn provider (%s)", cdncheck.DefaultCDNProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.MatchCloud, "match-cloud", "mcloud", nil, fmt.Sprintf("match host with specified cloud provider (%s)", cdncheck.DefaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.MatchWaf, "match-waf", "mwaf", nil, fmt.Sprintf("match host with specified waf provider (%s)", cdncheck.DefaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
 	)
 
 	flagSet.CreateGroup("filters", "Filters",
-		flagSet.StringSliceVarP(&opts.filterCdn, "filter-cdn", "fcdn", nil, fmt.Sprintf("filter host with specified cdn provider (%s)", cdncheck.DefaultCDNProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.filterCloud, "filter-cloud", "fcloud", nil, fmt.Sprintf("filter host with specified cloud provider (%s)", cdncheck.DefaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.StringSliceVarP(&opts.filterWaf, "filter-waf", "fwaf", nil, fmt.Sprintf("filter host with specified waf provider (%s)", cdncheck.DefaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
-		flagSet.BoolVarP(&opts.exclude, "exclude", "e", false, "exclude detected ip from output"),
+		flagSet.StringSliceVarP(&opts.FilterCdn, "filter-cdn", "fcdn", nil, fmt.Sprintf("filter host with specified cdn provider (%s)", cdncheck.DefaultCDNProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.FilterCloud, "filter-cloud", "fcloud", nil, fmt.Sprintf("filter host with specified cloud provider (%s)", cdncheck.DefaultCloudProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.FilterWaf, "filter-waf", "fwaf", nil, fmt.Sprintf("filter host with specified waf provider (%s)", cdncheck.DefaultWafProviders), goflags.CommaSeparatedStringSliceOptions),
+		flagSet.BoolVarP(&opts.Exclude, "exclude", "e", false, "exclude detected ip from output"),
 	)
 
 	flagSet.CreateGroup("config", "Config",
-		flagSet.StringSliceVarP(&opts.resolvers, "resolver", "r", nil, "list of resolvers to use (file or comma separated)", goflags.CommaSeparatedStringSliceOptions),
+		flagSet.StringSliceVarP(&opts.Resolvers, "resolver", "r", nil, "list of resolvers to use (file or comma separated)", goflags.CommaSeparatedStringSliceOptions),
 	)
 
 	if err := flagSet.Parse(); err != nil {
@@ -163,10 +164,10 @@ func readFlags() (*Options, error) {
 	// shows banner
 	showBanner()
 
-	if !opts.disableUpdateCheck {
+	if !opts.DisableUpdateCheck {
 		latestVersion, err := updateutils.GetToolVersionCallback("cdncheck", version)()
 		if err != nil {
-			if opts.verbose {
+			if opts.Verbose {
 				gologger.Error().Msgf("cdncheck version check failed: %v", err.Error())
 			}
 		} else {
@@ -174,7 +175,7 @@ func readFlags() (*Options, error) {
 		}
 	}
 
-	if opts.version {
+	if opts.Version {
 		gologger.Info().Msgf("Current version: %s", version)
 		os.Exit(0)
 	}

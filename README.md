@@ -7,20 +7,29 @@ The library can be used by importing `github.com/projectdiscovery/cdncheck`. her
 package main
 
 import (
-    "log"
-    "net"
-    "github.com/projectdiscovery/cdncheck"
+	"fmt"
+	"github.com/projectdiscovery/cdncheck/internal/runner"
 )
 
 func main() {
-    client, err := cdncheck.New()
-    if err != nil {
-        log.Fatal(err)
-    }
-    if found, _, _, err := client.Check(net.ParseIP("173.245.48.12")); found && err == nil {
-        log.Println("ip is part of cdn")
-    }
+	results := []runner.Output{}
+	options := runner.Options{
+		Inputs:   []string{"projectdiscovery.io", "173.245.48.12"},
+		Response: true,
+		NoColor:  true,
+		OnResult: func(r runner.Output) {
+			results = append(results, r)
+		},
+	}
+	runnner := runner.NewRunner(&options)
+	if err := runnner.Run(); err != nil {
+		fmt.Errorf(err.Error())
+	}
+	for _, result := range results {
+		fmt.Println(result.String())
+	}
 }
+
 ```
 
 ## Adding new providers

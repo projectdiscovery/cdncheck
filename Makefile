@@ -17,5 +17,7 @@ test:
 	$(GOTEST) $(GOFLAGS) ./...
 functional:
 	cd cmd/functional-test; bash run.sh
+integration:
+	cd integration_tests; bash run.sh
 tidy:
 	$(GOMOD) tidy
