@@ -1,7 +1,9 @@
 package main
 
 import (
-	"github.com/projectdiscovery/cdncheck/internal/runner"
+	"net"
+
+	"github.com/projectdiscovery/cdncheck"
 	errorutil "github.com/projectdiscovery/utils/errors"
 )
 
@@ -12,20 +14,11 @@ var libraryTestcases = map[string]TestCase{
 type goIntegrationTest struct{}
 
 func (h *goIntegrationTest) Execute() error {
-	results := []runner.Output{}
-	options := runner.Options{
-		Inputs:   []string{"projectdiscovery.io", "173.245.48.12"},
-		Response: true,
-		OnResult: func(r runner.Output) {
-			results = append(results, r)
-		},
-	}
-	runnner := runner.NewRunner(&options)
-	err := runnner.Run()
-	for _, result := range results {
-		if result.Input == "projectdiscovery.io" && result.WafName != "cloudflare" {
-			err = errorutil.New("expected projectdiscovery cdn as cloudflare, got %v", result.CdnName)
-		}
+	client := cdncheck.New()
+	ip := "173.245.48.12"
+	found, _, _, err := client.Check(net.ParseIP(ip))
+	if !found {
+		return errorutil.New("Expected %v is part of cdn", ip)
 	}
 	return err
 }

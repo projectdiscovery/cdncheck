@@ -7,7 +7,11 @@ on:
 jobs:  
   build:
     name: Test Builds
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest-16-cores, windows-latest-8-cores, macOS-12]
+        go-version: [1.19.x, 1.20.x]
     steps:
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -19,3 +23,17 @@ jobs:
 
       - name: Test
         run: go test ./...
+
+      - name: Build
+        run: go run .
+        working-directory: examples/
+      
+      - name: Integration Tests
+        run: |
+          chmod +x run.sh
+          bash run.sh ${{ matrix.os }}
+        working-directory: integration_tests/
+      
+      - name: Install
+        run: go install
+        working-directory: cmd/cdncheck/
