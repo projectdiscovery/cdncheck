@@ -13,7 +13,7 @@ require (
 	github.com/projectdiscovery/mapcidr v1.0.1
 	github.com/projectdiscovery/utils v0.0.24
 	github.com/stretchr/testify v1.8.2
-	github.com/weppos/publicsuffix-go v0.20.0
+	github.com/weppos/publicsuffix-go v0.30.0
 	github.com/yl2chen/cidranger v1.0.2
 	gopkg.in/yaml.v3 v3.0.1
 )
