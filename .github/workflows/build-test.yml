@@ -24,7 +24,7 @@ jobs:
       - name: Test
         run: go test ./...
 
-      - name: Build
+      - name: Run Example
         run: go run .
         working-directory: examples/
       
@@ -36,4 +36,8 @@ jobs:
       
       - name: Install
         run: go install
+        working-directory: cmd/cdncheck/
+      
+      - name: Race Condition Tests
+        run: go build -race .
         working-directory: cmd/cdncheck/
