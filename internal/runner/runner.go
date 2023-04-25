@@ -135,12 +135,13 @@ func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {
 		}
 	}
 
+	if r.options.Silent {
+		return
+	}
+	// show summary to user
 	sw := *r.aurora
 	if (cdnCount + wafCount + cloudCount) < 1 {
 		r.writer.WriteString(fmt.Sprintf("[%v] No results found.", sw.BrightBlue("INF").String()))
-		return
-	}
-	if r.options.Response || r.options.Json {
 		return
 	}
 	var builder strings.Builder

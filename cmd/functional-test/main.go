@@ -52,6 +52,8 @@ func runIndividualTestCase(testcase testutils.TestCase) error {
 		return testcase.CompareFunc(testcase.Target, devOutput)
 	}
 	if !testutils.CompareOutput(devOutput, testcase.Expected) {
+		// fmt.Printf("expected: **%v**\n", testcase.Expected)
+		// fmt.Printf("got88888: **%v**\n", devOutput)
 		return errors.Errorf("expected output %s, got %s", testcase.Expected, devOutput)
 	}
 	return nil
