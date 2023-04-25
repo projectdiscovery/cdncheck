@@ -1,4 +1,4 @@
-# input.yaml contains the inputs for the generate-index
+# provider.yaml contains the inputs for the generate-index
 # command. It is used to generate compiled CIDR ranges for checking.
 
 # cdn contains the inputs for cdn checking
@@ -7,6 +7,8 @@ cdn:
   asn:
     leaseweb:
       - AS60626
+    stackpath:
+      - AS64259
 
   # urls contains a list of URLs for CDN providers
   urls:
