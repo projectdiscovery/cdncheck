@@ -1,0 +1,70 @@
+# input.yaml contains the inputs for the generate-index
+# command. It is used to generate compiled CIDR ranges for checking.
+
+# cdn contains the inputs for cdn checking
+cdn:
+  # asn contains the ASN numbers for providers
+  asn:
+    leaseweb:
+      - AS60626
+
+  # urls contains a list of URLs for CDN providers
+  urls:
+    cloudfront:
+      - https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
+    fastly:
+      - https://api.fastly.com/public-ip-list
+    google:
+      - https://www.gstatic.com/ipranges/goog.json
+
+# waf contains the inputs for WAF CIDR checking
+waf:
+  # asn contains the ASN numbers for providers
+  asn:
+    akamai:
+      - AS12222
+    sucuri:
+      - AS30148
+
+  # urls contains a list of URLs for WAF providers
+  urls:
+    cloudflare:
+      - https://api.cloudflare.com/client/v4/ips
+
+# cloud contains the inputs for cloud CIDR checking
+cloud:
+  # urls contains a list of URLs for cloud providers
+  urls:
+    aws:
+      - https://ip-ranges.amazonaws.com/ip-ranges.json
+    google:
+      - https://www.gstatic.com/ipranges/cloud.json
+    oracle:
+      - https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json
+    azure:
+      - https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20221128.json
+    zscaler:
+      - https://api.config.zscaler.com/zscaler.net/cenr/json
+    office365:
+      - https://endpoints.office.com/endpoints/worldwide?clientrequestid=b10c5ed1-bad1-445f-b386-b919946339a7
+
+
+# common contains common items to all previous categories
+common:
+  fqdn:
+    amazon:
+      - cloudfront.net
+      - amazonaws.com
+    akamai:
+      - edgekey.net
+      - akamaiedge.net
+      - akamaitechnologies.com
+      - akamaihd.net
+    cloudflare:
+    - cloudflare.com
+    fastly:
+      - fastly.net
+    edgecast:
+      - edgecastcdn.net
+    incapsula:
+      - impervadns.net

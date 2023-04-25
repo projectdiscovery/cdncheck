@@ -1,0 +1,42 @@
+name: 💡Fingerprint Update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Setup golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+
+      - name: Build CDN Data
+        env:
+          IPINFO_TOKEN: "${{ secrets.IPINFO_TOKEN }}"
+        run: go run . -output ../../sources_data.json
+        working-directory: cmd/generate-index
+
+      - name: Create local changes
+        run: |
+          git add sources_data.json
+
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Weekly fingerprints update [$(date)] :robot:" -a --allow-empty
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

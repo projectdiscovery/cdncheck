@@ -1,0 +1,47 @@
+name: 🔨 Build Test
+
+on:
+  pull_request:
+    paths:
+      - '**.go'
+      - '**.mod'
+  workflow_dispatch:
+
+
+jobs:  
+  build:
+    name: Test Builds
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-12]
+        go-version: [1.19.x]
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Test
+        run: go test ./...
+
+      - name: Run Example
+        run: go run .
+        working-directory: examples/
+      
+      - name: Integration Tests
+        run: |
+          chmod +x run.sh
+          bash run.sh ${{ matrix.os }}
+        working-directory: integration_tests/
+      
+      - name: Install
+        run: go install
+        working-directory: cmd/cdncheck/
+      
+      - name: Race Condition Tests
+        run: go build -race .
+        working-directory: cmd/cdncheck/
