@@ -1,5 +1,64 @@
 # cdncheck
 
+# Installation
+
+`cdncheck` requires **go1.19** to install successfully. Run the following command to install the latest version:
+
+```sh
+go install -v github.com/projectdiscovery/cdncheck/cmd/cdncheck@latest
+```
+
+# Usage
+
+```sh
+cdncheck -h
+```
+
+This will display help for the tool. Here are all the switches it supports.
+
+```yaml
+Usage:
+  ./cdncheck [flags]
+
+Flags:
+INPUT:
+   -i, -inputs string[]  inputs to process
+   -l, -list string      file with inputs to process
+
+DETECTION:
+   -cdn    display cdn ip in cli output
+   -cloud  display cloud ip in cli output
+   -waf    display waf ip in cli output
+
+UPDATE:
+   -up, -update                 update cdncheck to latest version
+   -duc, -disable-update-check  disable automatic cdncheck update check
+
+OUTPUT:
+   -resp               display technology name in cli output
+   -o, -output string  write output in plain format to file
+   -version            display version of the project
+   -v, -verbose        display verbose output
+   -j, -jsonl          write output in json(line) format
+   -nc, -no-color      disable colors in cli output
+   -silent             only display results in output
+
+MATCHERS:
+   -mcdn, -match-cdn string[]      match host with specified cdn provider (cloudfront, fastly)
+   -mcloud, -match-cloud string[]  match host with specified cloud provider (aws, azure, google, oracle)
+   -mwaf, -match-waf string[]      match host with specified waf provider (cloudflare, incapsula)
+
+FILTERS:
+   -fcdn, -filter-cdn string[]      filter host with specified cdn provider (cloudfront, fastly)
+   -fcloud, -filter-cloud string[]  filter host with specified cloud provider (aws, azure, google, oracle)
+   -fwaf, -filter-waf string[]      filter host with specified waf provider (cloudflare, incapsula)
+   -e, -exclude                     exclude detected ip from output
+
+CONFIG:
+   -r, -resolver string[]  list of resolvers to use (file or comma separated)
+```
+
+## Cdncheck as library
 Helper library that checks if a given IP belongs to known CDN ranges (akamai, cloudflare, incapsula, sucuri and leaseweb).
 The library can be used by importing `github.com/projectdiscovery/cdncheck`. here follows a basic example:
 

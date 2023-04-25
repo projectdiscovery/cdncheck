@@ -147,19 +147,19 @@ func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {
 	builder.WriteString(fmt.Sprintf("Found result: %v", (cdnCount + cloudCount + wafCount)))
 	builder.WriteString(" (")
 	if cdnCount > 0 {
-		builder.WriteString(sw.BrightBlue(fmt.Sprintf("CDN: %v", cdnCount)).String())
+		builder.WriteString(fmt.Sprintf("%s %v", sw.BrightBlue("CDN:").String(), cdnCount))
 	}
 	if cloudCount > 0 {
 		if cdnCount > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString(sw.BrightGreen(fmt.Sprintf("CLOUD: %v", cloudCount)).String())
+		builder.WriteString(fmt.Sprintf("%s %v", sw.BrightGreen("CLOUD:").String(), cloudCount))
 	}
 	if wafCount > 0 {
 		if cdnCount > 0 || cloudCount > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString(sw.Yellow(fmt.Sprintf("WAF: %v", wafCount)).String())
+		builder.WriteString(fmt.Sprintf("%s %v", sw.Yellow("WAF:").String(), wafCount))
 	}
 	builder.WriteString(")")
 	gologger.Info().Msg(builder.String())
