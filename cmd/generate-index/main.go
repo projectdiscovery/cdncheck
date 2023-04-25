@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	input  = flag.String("input", "input.yaml", "input.yaml file for processing")
+	input  = flag.String("input", "provider.yaml", "provider file for processing")
 	output = flag.String("output", "sources_data.json", "output file for generated sources")
 	token  = flag.String("token", "", "Token for the ipinfo service")
 )

@@ -1,2 +1,3 @@
 cmd/generate-index/generate-index
 cmd/cdncheck/cdncheck
+dist/

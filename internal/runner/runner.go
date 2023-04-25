@@ -83,24 +83,6 @@ func (r *Runner) process(output chan Output, wg *sync.WaitGroup) {
 	for _, target := range r.options.Inputs {
 		r.processInputItem(target, output)
 	}
-	if r.options.List != "" {
-		file, err := os.Open(r.options.List)
-		if err != nil {
-			if r.options.Verbose {
-				gologger.Error().Msgf("Could not open input file: %s", err)
-			}
-			return
-		}
-		defer file.Close()
-
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			text := scanner.Text()
-			if text != "" {
-				r.processInputItem(text, output)
-			}
-		}
-	}
 	if r.options.HasStdin {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
