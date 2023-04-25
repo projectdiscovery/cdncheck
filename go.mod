@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/goflags v0.1.8
 	github.com/projectdiscovery/gologger v1.1.8
 	github.com/projectdiscovery/mapcidr v1.1.1
-	github.com/projectdiscovery/utils v0.0.24
+	github.com/projectdiscovery/utils v0.0.25
 	github.com/stretchr/testify v1.8.2
 	github.com/weppos/publicsuffix-go v0.30.0
 	github.com/yl2chen/cidranger v1.0.2
