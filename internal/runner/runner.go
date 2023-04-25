@@ -132,20 +132,19 @@ func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {
 			r.writer.WriteJSON(receivedData)
 		} else if r.options.Response && !r.options.Exclude {
 			r.writer.WriteString(receivedData.String())
+		} else {
+			r.writer.WriteString(receivedData.Input)
 		}
 	}
 
-	if r.options.Silent {
-		return
-	}
 	// show summary to user
 	sw := *r.aurora
 	if (cdnCount + wafCount + cloudCount) < 1 {
-		r.writer.WriteString(fmt.Sprintf("[%v] No results found.", sw.BrightBlue("INF").String()))
+		gologger.Info().Msgf("No results found.")
 		return
 	}
 	var builder strings.Builder
-	builder.WriteString(fmt.Sprintf("[%v] Found result: %v", sw.BrightBlue("INF").String(), (cdnCount + cloudCount + wafCount)))
+	builder.WriteString(fmt.Sprintf("Found result: %v", (cdnCount + cloudCount + wafCount)))
 	builder.WriteString(" (")
 	if cdnCount > 0 {
 		builder.WriteString(sw.BrightBlue(fmt.Sprintf("CDN: %v", cdnCount)).String())
@@ -163,7 +162,7 @@ func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {
 		builder.WriteString(sw.Yellow(fmt.Sprintf("WAF: %v", wafCount)).String())
 	}
 	builder.WriteString(")")
-	r.writer.WriteString(builder.String())
+	gologger.Info().Msg(builder.String())
 }
 
 func (r *Runner) configureOutput() error {
