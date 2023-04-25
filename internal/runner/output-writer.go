@@ -41,6 +41,8 @@ func (o *OutputWriter) WriteJSON(data Output) {
 
 func (o *OutputWriter) Close() {
 	for _, writer := range o.writers {
-		_ = writer.(io.Closer).Close()
+		if wr, ok := writer.(io.Closer); ok {
+			wr.Close()
+		}
 	}
 }

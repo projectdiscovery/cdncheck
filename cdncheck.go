@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	DefaultCDNProviders   = mapKeys(generatedData.CDN)
-	DefaultWafProviders   = mapKeys(generatedData.WAF)
-	DefaultCloudProviders = mapKeys(generatedData.Cloud)
+	DefaultCDNProviders   string
+	DefaultWafProviders   string
+	DefaultCloudProviders string
 )
 
 // Client checks for CDN based IPs which should be excluded
