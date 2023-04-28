@@ -16,17 +16,19 @@ import (
 	"github.com/projectdiscovery/fastdialer/fastdialer"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/mapcidr"
+	"github.com/projectdiscovery/retryabledns"
 	errorutils "github.com/projectdiscovery/utils/errors"
 	iputils "github.com/projectdiscovery/utils/ip"
 	urlutils "github.com/projectdiscovery/utils/url"
 )
 
 type Runner struct {
-	options    *Options
-	cdnclient  *cdncheck.Client
-	fastdialer *fastdialer.Dialer
-	aurora     *aurora.Aurora
-	writer     *OutputWriter
+	options      *Options
+	cdnclient    *cdncheck.Client
+	fastdialer   *fastdialer.Dialer
+	retryabledns *retryabledns.Client
+	aurora       *aurora.Aurora
+	writer       *OutputWriter
 }
 
 func NewRunner(options *Options) *Runner {
@@ -43,11 +45,22 @@ func NewRunner(options *Options) *Runner {
 	fdialer, err := fastdialer.NewDialer(fOption)
 	if err != nil {
 		if options.Verbose {
-			gologger.Error().Msgf("%v: fialed to initialize dailer", err.Error())
+			gologger.Error().Msgf("%v: fialed to initialize dialer", err.Error())
 		}
 		return runner
 	}
 	runner.fastdialer = fdialer
+
+	retryabledns, err := retryabledns.New(fOption.BaseResolvers, fOption.MaxRetries)
+	if err != nil {
+		if options.Verbose {
+			gologger.Error().Msgf("%v: fialed to initialize retryableDns", err.Error())
+		}
+		return runner
+	}
+
+	runner.retryabledns = retryabledns
+
 	return runner
 }
 
@@ -192,11 +205,15 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 }
 
 func (r *Runner) processInputItemSingle(item string, output chan Output) {
+	isDomain := false
+	domain := ""
 	data := Output{
 		aurora: r.aurora,
 		Input:  item,
 	}
 	if !iputils.IsIP(item) {
+		isDomain = true
+		domain = item
 		ipAddr, err := r.resolveToIP(item)
 		if err != nil {
 			if r.options.Verbose {
@@ -220,6 +237,24 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 			gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
 		}
 		return
+	}
+	if isDomain && !isCDN {
+		cnames, err := r.resolveToCNAMEs(domain)
+		if err != nil {
+			if r.options.Verbose {
+				gologger.Error().Msgf("Could not resolve CNAME %s: %s", item, err)
+			}
+			return
+		}
+		isCDN, provider, err = r.cdnclient.CheckSuffix(cnames...)
+		if err != nil {
+			if r.options.Verbose {
+				gologger.Error().Msgf("Could not check with suffix cdn %s: %s", item, err)
+			}
+		}
+		if isCDN {
+			itemType = "waf"
+		}
 	}
 	data.itemType = itemType
 	data.IP = item
@@ -267,14 +302,26 @@ func (r *Runner) resolveToIP(domain string) (string, error) {
 	if err != nil {
 		return domain, err
 	}
-	dsnData, err := r.fastdialer.GetDNSData(url.Host)
+	dnsData, err := r.fastdialer.GetDNSData(url.Host)
 	if err != nil {
 		return domain, err
 	}
-	if len(dsnData.A) < 1 {
+	if len(dnsData.A) < 1 {
 		return domain, errorutils.New("fialed to resolve domain")
 	}
-	return dsnData.A[0], nil
+	return dnsData.A[0], nil
+}
+
+func (r *Runner) resolveToCNAMEs(domain string) (cnames []string, err error) {
+	url, err := urlutils.Parse(domain)
+	if err != nil {
+		return cnames, err
+	}
+	dnsData, err := r.retryabledns.CNAME(url.Host)
+	if err != nil {
+		return cnames, err
+	}
+	return dnsData.CNAME, nil
 }
 
 func matchIP(options *Options, data Output) bool {
