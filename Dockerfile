@@ -9,7 +9,7 @@ RUN go build ./cmd/cdncheck
 
 FROM alpine:3.17.3
 RUN apk -U upgrade --no-cache \
-    && apk add --no-cache bind-tools ca-certificates chromium
+    && apk add --no-cache bind-tools ca-certificates
 COPY --from=builder /app/cdncheck /usr/local/bin/
 
 ENTRYPOINT ["cdncheck"]
