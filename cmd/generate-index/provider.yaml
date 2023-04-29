@@ -7,8 +7,6 @@ cdn:
   asn:
     leaseweb:
       - AS60626
-    stackpath:
-      - AS64259
 
   # urls contains a list of URLs for CDN providers
   urls:
@@ -18,6 +16,8 @@ cdn:
       - https://api.fastly.com/public-ip-list
     google:
       - https://www.gstatic.com/ipranges/goog.json
+    stackpath:
+      - https://k3t9x2h3.map2.ssl.hwcdn.net/ipblocks.txt
 
 # waf contains the inputs for WAF CIDR checking
 waf:
