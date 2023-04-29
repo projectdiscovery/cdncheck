@@ -54,7 +54,7 @@ func NewRunner(options *Options) *Runner {
 	retryabledns, err := retryabledns.New(fOption.BaseResolvers, fOption.MaxRetries)
 	if err != nil {
 		if options.Verbose {
-			gologger.Error().Msgf("%v: fialed to initialize retryableDns", err.Error())
+			gologger.Error().Msgf("%v: failed to initialize retryableDns", err.Error())
 		}
 		return runner
 	}
