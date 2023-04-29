@@ -306,7 +306,7 @@ func (r *Runner) resolveToIP(domain string) (string, error) {
 	if err != nil {
 		return domain, err
 	}
-	if len(dsnData.A) < 1 {
+	if len(dnsData.A) < 1 {
 		return domain, errorutils.New("failed to resolve domain")
 	}
 	return dnsData.A[0], nil
