@@ -43,7 +43,7 @@ func NewRunner(options *Options) *Runner {
 	fdialer, err := fastdialer.NewDialer(fOption)
 	if err != nil {
 		if options.Verbose {
-			gologger.Error().Msgf("%v: fialed to initialize dailer", err.Error())
+			gologger.Error().Msgf("%v: failed to initialize dailer", err.Error())
 		}
 		return runner
 	}
@@ -272,7 +272,7 @@ func (r *Runner) resolveToIP(domain string) (string, error) {
 		return domain, err
 	}
 	if len(dsnData.A) < 1 {
-		return domain, errorutils.New("fialed to resolve domain")
+		return domain, errorutils.New("failed to resolve domain")
 	}
 	return dsnData.A[0], nil
 }
