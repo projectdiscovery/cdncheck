@@ -2,7 +2,6 @@ package generate
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -144,9 +143,9 @@ retry:
 	if err != nil {
 		return nil, err
 	}
-	// if the body type is not json retry with the first json link in the page
-	unmarshaledData := make(map[string]interface{})
-	if err := json.Unmarshal(data, &unmarshaledData); err != nil && !retried {
+	// if the body type is not text based, retry with the first json link in the page
+	log.Printf(resp.Header.Get("Content-Type"))
+	if retried == false && resp.Header.Get("Content-Type") == "text/html" {
 		var extractedURL string
 		docReader, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 		if err != nil {

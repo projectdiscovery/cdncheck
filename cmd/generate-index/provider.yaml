@@ -44,7 +44,7 @@ cloud:
     oracle:
       - https://docs.oracle.com/en-us/iaas/tools/public_ip_ranges.json
     azure:
-      - https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20221128.json
+      - https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519
     zscaler:
       - https://api.config.zscaler.com/zscaler.net/cenr/json
     office365:
