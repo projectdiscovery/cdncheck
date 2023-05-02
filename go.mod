@@ -7,7 +7,7 @@ require (
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/fastdialer v0.0.24
+	github.com/projectdiscovery/fastdialer v0.0.25
 	github.com/projectdiscovery/goflags v0.1.8
 	github.com/projectdiscovery/gologger v1.1.8
 	github.com/projectdiscovery/mapcidr v1.1.1
@@ -56,18 +56,15 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
-	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/projectdiscovery/blackrock v0.0.1 // indirect
-	github.com/projectdiscovery/hmap v0.0.10 // indirect
-	github.com/projectdiscovery/iputil v0.0.2 // indirect
-	github.com/projectdiscovery/networkpolicy v0.0.4 // indirect
+	github.com/projectdiscovery/hmap v0.0.11 // indirect
+	github.com/projectdiscovery/networkpolicy v0.0.5 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.21 // indirect
 	github.com/projectdiscovery/retryablehttp-go v1.0.14 // indirect
-	github.com/projectdiscovery/stringsutil v0.0.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
