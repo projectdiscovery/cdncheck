@@ -13,41 +13,29 @@ import (
 	"github.com/logrusorgru/aurora"
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
-	"github.com/projectdiscovery/fastdialer/fastdialer"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/mapcidr"
-	errorutils "github.com/projectdiscovery/utils/errors"
 	iputils "github.com/projectdiscovery/utils/ip"
-	urlutils "github.com/projectdiscovery/utils/url"
 )
 
 type Runner struct {
-	options    *Options
-	cdnclient  *cdncheck.Client
-	fastdialer *fastdialer.Dialer
-	aurora     *aurora.Aurora
-	writer     *OutputWriter
+	options   *Options
+	cdnclient *cdncheck.Client
+	aurora    *aurora.Aurora
+	writer    *OutputWriter
 }
 
 func NewRunner(options *Options) *Runner {
 	standardWriter := aurora.NewAurora(!options.NoColor)
+	client, err := cdncheck.NewWithOpts(options.MaxRetries, options.Resolvers)
+	if err != nil {
+		gologger.Fatal().Msgf("failed to create cdncheck client: %v", err)
+	}
 	runner := &Runner{
 		options:   options,
-		cdnclient: cdncheck.New(),
+		cdnclient: client,
 		aurora:    &standardWriter,
 	}
-	fOption := fastdialer.DefaultOptions
-	if len(options.Resolvers) > 0 {
-		fOption.BaseResolvers = options.Resolvers
-	}
-	fdialer, err := fastdialer.NewDialer(fOption)
-	if err != nil {
-		if options.Verbose {
-			gologger.Error().Msgf("%v: failed to initialize dailer", err.Error())
-		}
-		return runner
-	}
-	runner.fastdialer = fdialer
 	return runner
 }
 
@@ -196,50 +184,49 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		aurora: r.aurora,
 		Input:  item,
 	}
-	if !iputils.IsIP(item) {
-		ipAddr, err := r.resolveToIP(item)
-		if err != nil {
-			if r.options.Verbose {
-				gologger.Error().Msgf("Could not parse domain/url %s: %s", item, err)
-			}
-			return
+
+	if iputils.IsIPv6(item) {
+		// TODO: IPv6 support refer issue #59
+		if r.options.Verbose {
+			gologger.Error().Msgf("IPv6 is not supported: %s", item)
 		}
-		item = ipAddr
+		return
 	}
 
-	parsed := net.ParseIP(item)
-	if parsed == nil {
-		if r.options.Verbose {
-			gologger.Error().Msgf("Could not parse IP address: %s", item)
-		}
-		return
+	var matched bool
+	var provider, itemType string
+	var err error
+
+	if iputils.IsIP(item) {
+		targetIP := net.ParseIP(item)
+		matched, provider, itemType, err = r.cdnclient.Check(targetIP)
+	} else {
+		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
 	}
-	isCDN, provider, itemType, err := r.cdnclient.Check(parsed)
-	if err != nil {
-		if r.options.Verbose {
-			gologger.Error().Msgf("Could not check IP cdn %s: %s", item, err)
-		}
-		return
+	if err != nil && r.options.Verbose {
+		gologger.Error().Msgf("Could not check domain cdn %s: %s", item, err)
 	}
+
 	data.itemType = itemType
 	data.IP = item
 	data.Timestamp = time.Now()
 
 	if r.options.Exclude {
-		if !isCDN {
+		if !matched {
 			output <- data
 		}
 		return
 	}
+
 	switch itemType {
 	case "cdn":
-		data.Cdn = isCDN
+		data.Cdn = matched
 		data.CdnName = provider
 	case "cloud":
-		data.Cloud = isCDN
+		data.Cloud = matched
 		data.CloudName = provider
 	case "waf":
-		data.Waf = isCDN
+		data.Waf = matched
 		data.WafName = provider
 	}
 	if skipped := filterIP(r.options, data); skipped {
@@ -249,32 +236,15 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		return
 	}
 	switch {
-	case r.options.Cdn && data.itemType == "cdn",
-		r.options.Cloud && data.itemType == "cloud",
-		r.options.Waf && data.itemType == "waf":
+	case r.options.Cdn && data.itemType == "cdn", r.options.Cloud && data.itemType == "cloud", r.options.Waf && data.itemType == "waf":
 		{
 			output <- data
 		}
-	case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && isCDN:
+	case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && matched:
 		{
 			output <- data
 		}
 	}
-}
-
-func (r *Runner) resolveToIP(domain string) (string, error) {
-	url, err := urlutils.Parse(domain)
-	if err != nil {
-		return domain, err
-	}
-	dsnData, err := r.fastdialer.GetDNSData(url.Host)
-	if err != nil {
-		return domain, err
-	}
-	if len(dsnData.A) < 1 {
-		return domain, errorutils.New("failed to resolve domain")
-	}
-	return dsnData.A[0], nil
 }
 
 func matchIP(options *Options, data Output) bool {

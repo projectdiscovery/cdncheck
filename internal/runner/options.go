@@ -75,6 +75,7 @@ type Options struct {
 	FilterWaf          goflags.StringSlice
 	Resolvers          goflags.StringSlice
 	OnResult           func(r Output)
+	MaxRetries         int
 }
 
 // configureOutput configures the output logging levels to be displayed on the screen
@@ -145,6 +146,7 @@ func readFlags() (*Options, error) {
 	flagSet.CreateGroup("config", "CONFIG",
 		flagSet.StringSliceVarP(&opts.Resolvers, "resolver", "r", nil, "list of resolvers to use (file or comma separated)", goflags.CommaSeparatedStringSliceOptions),
 		flagSet.BoolVarP(&opts.Exclude, "exclude", "e", false, "exclude detected ip from output"),
+		flagSet.IntVar(&opts.MaxRetries, "retry", 2, "maximum number of retries for dns resolution (must be at least 1)"),
 	)
 
 	flagSet.CreateGroup("update", "UPDATE",

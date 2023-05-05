@@ -68,14 +68,14 @@ DETECTION:
    -waf    display only waf in cli output
 
 MATCHER:
-   -mcdn, -match-cdn string[]      match host with specified cdn provider (fastly, cloudfront)
-   -mcloud, -match-cloud string[]  match host with specified cloud provider (google, oracle, aws, azure)
-   -mwaf, -match-waf string[]      match host with specified waf provider (cloudflare, incapsula)
+   -mcdn, -match-cdn string[]      match host with specified cdn provider (cloudfront, fastly, google, leaseweb)
+   -mcloud, -match-cloud string[]  match host with specified cloud provider (aws, google, oracle)
+   -mwaf, -match-waf string[]      match host with specified waf provider (cloudflare, incapsula, sucuri, akamai)
 
 FILTER:
-   -fcdn, -filter-cdn string[]      filter host with specified cdn provider (fastly, cloudfront)
-   -fcloud, -filter-cloud string[]  filter host with specified cloud provider (google, oracle, aws, azure)
-   -fwaf, -filter-waf string[]      filter host with specified waf provider (cloudflare, incapsula)
+   -fcdn, -filter-cdn string[]      filter host with specified cdn provider (cloudfront, fastly, google, leaseweb)
+   -fcloud, -filter-cloud string[]  filter host with specified cloud provider (aws, google, oracle)
+   -fwaf, -filter-waf string[]      filter host with specified waf provider (cloudflare, incapsula, sucuri, akamai)
 
 OUTPUT:
    -resp               display technology name in cli output
@@ -89,6 +89,7 @@ OUTPUT:
 CONFIG:
    -r, -resolver string[]  list of resolvers to use (file or comma separated)
    -e, -exclude            exclude detected ip from output
+   -retry int              maximum number of retries for dns resolution (must be at least 1) (default 2)
 
 UPDATE:
    -up, -update                 update cdncheck to latest version
