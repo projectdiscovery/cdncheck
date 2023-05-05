@@ -75,6 +75,7 @@ type Options struct {
 	FilterWaf          goflags.StringSlice
 	Resolvers          goflags.StringSlice
 	OnResult           func(r Output)
+	MaxRetries         int
 }
 
 // configureOutput configures the output logging levels to be displayed on the screen
@@ -82,7 +83,7 @@ func configureOutput(options *Options) {
 	if options.Silent {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelSilent)
 	} else if options.Verbose {
-		gologger.DefaultLogger.SetMaxLevel(levels.LevelWarning)
+		gologger.DefaultLogger.SetMaxLevel(levels.LevelVerbose)
 	} else if options.Debug {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelDebug)
 	} else {
