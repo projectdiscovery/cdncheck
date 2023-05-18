@@ -1,10 +1,9 @@
 package runner
 
 import (
-    "github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/gologger"
 	updateutils "github.com/projectdiscovery/utils/update"
 )
-
 
 const banner = `
             __           __              __  
@@ -15,7 +14,7 @@ const banner = `
 `
 
 // version is the current version of cdncheck
-const version = `1.0.3`
+const version = `v1.0.3`
 
 // showBanner is used to show the banner to the user
 func showBanner() {
