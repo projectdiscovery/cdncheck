@@ -2,7 +2,6 @@ package generate
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -144,9 +143,8 @@ retry:
 	if err != nil {
 		return nil, err
 	}
-	// if the body type is not json retry with the first json link in the page
-	unmarshaledData := make(map[string]interface{})
-	if err := json.Unmarshal(data, &unmarshaledData); err != nil && !retried {
+	// if the body type is HTML, retry with the first json link in the page (special case for Azure download page to find changing URLs)
+	if resp.Header.Get("Content-Type") == "text/html" && !retried {
 		var extractedURL string
 		docReader, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 		if err != nil {
