@@ -164,6 +164,11 @@ func readFlags() (*Options, error) {
 	// shows banner
 	showBanner()
 
+	if opts.Version {
+		gologger.Info().Msgf("Current version: %s", version)
+		os.Exit(0)
+	}
+
 	if !opts.DisableUpdateCheck {
 		latestVersion, err := updateutils.GetToolVersionCallback("cdncheck", version)()
 		if err != nil {
@@ -175,9 +180,5 @@ func readFlags() (*Options, error) {
 		}
 	}
 
-	if opts.Version {
-		gologger.Info().Msgf("Current version: %s", version)
-		os.Exit(0)
-	}
 	return opts, nil
 }
