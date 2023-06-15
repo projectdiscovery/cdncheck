@@ -27,7 +27,7 @@ jobs:
           version: latest
           workdir: .
         env: 
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ secrets.PDTEAMX_PAT }}"
           SLACK_WEBHOOK: "${{ secrets.RELEASE_SLACK_WEBHOOK }}"
           DISCORD_WEBHOOK_ID: "${{ secrets.DISCORD_WEBHOOK_ID }}"
           DISCORD_WEBHOOK_TOKEN: "${{ secrets.DISCORD_WEBHOOK_TOKEN }}"
