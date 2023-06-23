@@ -13,5 +13,5 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ahmadnassri/action-dependabot-auto-merge@v2
         with:
-          github-token: ${{ secrets.PDTEAMX_PAT }}
+          github-token: ${{ secrets.DEPENDABOT_TOKEN }}
           target: all
