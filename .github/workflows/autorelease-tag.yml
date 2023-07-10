@@ -21,6 +21,20 @@ jobs:
 
       - name: Bump version in banner.go
         run: bash scripts/bump_version.sh internal/runner/banner.go patch
+      
+      - name: Create local changes
+        run: |
+          git add internal/runner/banner.go
+
+      - name: Commit files
+        run: |
+          git commit -am "Bump version"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PDTEAMX_PAT }}
+          branch: ${{ github.ref }}
 
       - name: Create release and tag
         if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0  }}
