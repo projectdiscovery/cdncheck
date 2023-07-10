@@ -48,4 +48,4 @@ fi
 new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
 
 # Replace the version in the provided file
-sed -i "s/const version = \`$current_version\`/const version = \`$new_version\`/g" $file
+sed -i "/const version =/s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$new_version/g" $file
