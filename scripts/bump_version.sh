@@ -25,7 +25,7 @@ fi
 
 # Extract the current version from the provided file
 # current_version=$(grep -oP 'const version = `\K.*(?=`)' $file) #get from file
-current_version=$(git tag --sort=-v:refname | head -n 1 | awk -F. '{OFS="."; $NF+=1; print $0}') #get from git tags
+current_version=$(git tag --sort=-v:refname | head -n 1 | awk -F. '{OFS="."; $NF; print $0}') #get from git tags
 
 
 # Split the version into parts
