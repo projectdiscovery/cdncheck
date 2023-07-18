@@ -15,10 +15,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Commit Count
-        id: get_commit
-        run: git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count | xargs -I {} echo COMMIT_COUNT={} >> $GITHUB_OUTPUT
-
       - name: Bump version in banner.go
         run: bash scripts/bump_version.sh internal/runner/banner.go patch
       
@@ -28,15 +24,19 @@ jobs:
 
       - name: Commit files
         run: |
-          git config --local user.email "pdteamx@projectdiscovery.io"
-          git config --local user.name "pdteamx"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git commit -am "Bump version"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.PDTEAMX_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+
+      - name: Get Commit Count
+        id: get_commit
+        run: git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count | xargs -I {} echo COMMIT_COUNT={} >> $GITHUB_OUTPUT
 
       - name: Create release and tag
         if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0  }}
