@@ -14,17 +14,19 @@ import (
 	semver "github.com/Masterminds/semver/v3"
 )
 
-func bumpVersion(fileName, varName, part string) error {
+func bumpVersion(fileName, varName, part string) (string, string, error) {
 	absPath, err := filepath.Abs(fileName)
 	if err != nil {
-		return fmt.Errorf("unable to get absolute path: %v", err)
+		return "", "", fmt.Errorf("unable to get absolute path: %v", err)
 	}
 
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, absPath, nil, parser.ParseComments)
 	if err != nil {
-		return fmt.Errorf("could not parse file: %w", err)
+		return "", "", fmt.Errorf("could not parse file: %w", err)
 	}
+
+	var oldVersion, newVersion string
 
 	ast.Inspect(node, func(n ast.Node) bool {
 		if v, ok := n.(*ast.GenDecl); ok {
@@ -32,8 +34,8 @@ func bumpVersion(fileName, varName, part string) error {
 				if s, ok := spec.(*ast.ValueSpec); ok {
 					for idx, id := range s.Names {
 						if id.Name == varName {
-							versionStr, _ := strconv.Unquote(s.Values[idx].(*ast.BasicLit).Value)
-							v, err := semver.NewVersion(versionStr)
+							oldVersion, _ = strconv.Unquote(s.Values[idx].(*ast.BasicLit).Value)
+							v, err := semver.NewVersion(oldVersion)
 							if err != nil {
 								return false
 							}
@@ -48,7 +50,8 @@ func bumpVersion(fileName, varName, part string) error {
 							default:
 								return false
 							}
-							s.Values[idx].(*ast.BasicLit).Value = fmt.Sprintf("`v%s`", vInc().String())
+							newVersion = fmt.Sprintf("`v%s`", vInc().String())
+							s.Values[idx].(*ast.BasicLit).Value = newVersion
 							return false
 						}
 					}
@@ -60,15 +63,15 @@ func bumpVersion(fileName, varName, part string) error {
 
 	f, err := os.OpenFile(fileName, os.O_RDWR, 0666)
 	if err != nil {
-		return fmt.Errorf("could not open file: %w", err)
+		return oldVersion, newVersion, fmt.Errorf("could not open file: %w", err)
 	}
 	defer f.Close()
 
 	if err := printer.Fprint(f, fset, node); err != nil {
-		return fmt.Errorf("could not write to file: %w", err)
+		return oldVersion, newVersion, fmt.Errorf("could not write to file: %w", err)
 	}
 
-	return nil
+	return oldVersion, newVersion, nil
 }
 
 func main() {
@@ -88,9 +91,10 @@ func main() {
 		fmt.Println("Error: Both -file and -var are required")
 		os.Exit(1)
 	}
-	err := bumpVersion(fileName, varName, part)
+	oldVersion, newVersion, err := bumpVersion(fileName, varName, part)
 	if err != nil {
 		fmt.Printf("Error bumping version: %v\n", err)
 		os.Exit(1)
 	}
+	fmt.Printf("Bump from %s to %s\n", oldVersion, newVersion)
 }
