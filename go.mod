@@ -8,7 +8,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.11
-	github.com/projectdiscovery/gologger v1.1.10
+	github.com/projectdiscovery/gologger v1.1.11
 	github.com/projectdiscovery/mapcidr v1.1.2
 	github.com/projectdiscovery/retryabledns v1.0.30
 	github.com/projectdiscovery/utils v0.0.40
