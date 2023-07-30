@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/gologger v1.1.11
 	github.com/projectdiscovery/mapcidr v1.1.2
 	github.com/projectdiscovery/retryabledns v1.0.32
-	github.com/projectdiscovery/utils v0.0.44
+	github.com/projectdiscovery/utils v0.0.45
 	github.com/stretchr/testify v1.8.4
 	github.com/weppos/publicsuffix-go v0.30.1
 	github.com/yl2chen/cidranger v1.0.2
@@ -46,7 +46,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible // indirect
-	github.com/microcosm-cc/bluemonday v1.0.24 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.25 // indirect
 	github.com/miekg/dns v1.1.55 // indirect
 	github.com/minio/selfupdate v0.6.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
