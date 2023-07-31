@@ -19,9 +19,11 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.20.x
-
+      
       - name: Bump version in banner.go
-        run: go run scripts/versionbump.go -file internal/runner/banner.go -var version -part patch
+        run: |
+          curl -LO https://raw.githubusercontent.com/projectdiscovery/utils/main/scripts/versionbump/versionbump.go
+          go run versionbump.go -file internal/runner/banner.go -var version -part patch
       
       - name: Create local changes
         run: |
