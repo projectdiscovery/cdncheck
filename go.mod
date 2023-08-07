@@ -10,7 +10,7 @@ require (
 	github.com/projectdiscovery/goflags v0.1.11
 	github.com/projectdiscovery/gologger v1.1.11
 	github.com/projectdiscovery/mapcidr v1.1.2
-	github.com/projectdiscovery/retryabledns v1.0.32
+	github.com/projectdiscovery/retryabledns v1.0.33
 	github.com/projectdiscovery/utils v0.0.45
 	github.com/stretchr/testify v1.8.4
 	github.com/weppos/publicsuffix-go v0.30.1
