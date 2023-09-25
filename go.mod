@@ -9,8 +9,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.20
 	github.com/projectdiscovery/gologger v1.1.11
-	github.com/projectdiscovery/mapcidr v1.1.2
-	github.com/projectdiscovery/retryabledns v1.0.32
+	github.com/projectdiscovery/mapcidr v1.1.9
+	github.com/projectdiscovery/retryabledns v1.0.35
 	github.com/projectdiscovery/utils v0.0.55
 	github.com/stretchr/testify v1.8.4
 	github.com/weppos/publicsuffix-go v0.30.1
