@@ -9,7 +9,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.26
 	github.com/projectdiscovery/gologger v1.1.11
-	github.com/projectdiscovery/mapcidr v1.1.13
+	github.com/projectdiscovery/mapcidr v1.1.14
 	github.com/projectdiscovery/retryabledns v1.0.41
 	github.com/projectdiscovery/utils v0.0.62
 	github.com/stretchr/testify v1.8.4
