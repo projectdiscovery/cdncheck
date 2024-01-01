@@ -7,7 +7,7 @@ require (
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/goflags v0.1.32
+	github.com/projectdiscovery/goflags v0.1.33
 	github.com/projectdiscovery/gologger v1.1.12
 	github.com/projectdiscovery/mapcidr v1.1.16
 	github.com/projectdiscovery/retryabledns v1.0.48
