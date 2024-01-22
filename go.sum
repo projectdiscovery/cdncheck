@@ -130,8 +130,8 @@ github.com/projectdiscovery/gologger v1.1.12 h1:uX/QkQdip4PubJjjG0+uk5DtyAi1ANPJ
 github.com/projectdiscovery/gologger v1.1.12/go.mod h1:DI8nywPLERS5mo8QEA9E7gd5HZ3Je14SjJBH3F5/kLw=
 github.com/projectdiscovery/mapcidr v1.1.16 h1:rjj1w5D6hbTsUQXYClLcGdfBEy9bryclgi70t0vBggo=
 github.com/projectdiscovery/mapcidr v1.1.16/go.mod h1:rGqpBhStdwOQ2uS62QM9qPsybwMwIhT7CTd2bxoHs8Q=
-github.com/projectdiscovery/retryabledns v1.0.51 h1:bX/apiRGZwhASBAT7o3qmZ0FznuBlHQlIQdCw1TAzcg=
-github.com/projectdiscovery/retryabledns v1.0.51/go.mod h1:rFu1zc7HLHPEipuF91ZNMT1yGG0FKBVUnxnqLJ4OhF4=
+github.com/projectdiscovery/retryabledns v1.0.52 h1:jJRIT5y7KYZvaZAAvlkxvkKkQzst6LvEeLDqRc3LeOM=
+github.com/projectdiscovery/retryabledns v1.0.52/go.mod h1:Ea478e6XNVAmfH4KwqtLNjkwdgkpVH1O3+FL2dKLNb8=
 github.com/projectdiscovery/utils v0.0.74 h1:mrjRm1eF3ZLIikIpWF3Nzbar/twHHqhz9WSi9fqGQeA=
 github.com/projectdiscovery/utils v0.0.74/go.mod h1:4MBUFfZ9Mm96PiWUj2zJ99sx2AVOpZkGukC6O16+p+o=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
