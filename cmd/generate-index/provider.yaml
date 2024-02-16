@@ -105,7 +105,7 @@ common:
       - akamaihd.net
       - edgesuite.net
     cloudflare:
-    - cloudflare.com
+      - cloudflare.com
     fastly:
       - fastly.net
     edgecast:
