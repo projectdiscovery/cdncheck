@@ -7,6 +7,18 @@ cdn:
   asn:
     leaseweb:
       - AS60626
+    qrator:
+      - AS197068
+      - AS200449
+      - AS51115
+
+  cidr:
+    qrator:
+      - "66.110.32.128/30"
+      - "83.234.15.112/30"
+      - "87.245.197.192/30"
+      - "185.94.108.0/24"
+      - "185.104.208.0/22"
 
   # urls contains a list of URLs for CDN providers
   urls:
@@ -113,3 +125,5 @@ common:
       - edgesuite.net
     incapsula:
       - impervadns.net
+    qrator:
+      - qrator.net
