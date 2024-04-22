@@ -7,11 +7,11 @@ require (
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/goflags v0.1.46
+	github.com/projectdiscovery/goflags v0.1.49
 	github.com/projectdiscovery/gologger v1.1.12
 	github.com/projectdiscovery/mapcidr v1.1.16
 	github.com/projectdiscovery/retryabledns v1.0.58
-	github.com/projectdiscovery/utils v0.0.87
+	github.com/projectdiscovery/utils v0.0.89
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
 	github.com/yl2chen/cidranger v1.0.2
@@ -82,13 +82,13 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zcalusic/sysinfo v1.0.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20230420155640-133eef4313cb // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
