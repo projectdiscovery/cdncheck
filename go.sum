@@ -131,8 +131,8 @@ github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c h1:ncq/mPwQF
 github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c/go.mod h1:OmDBASR4679mdNQnz2pUhc2G8CO2JrUAVFDRBDP/hJE=
 github.com/projectdiscovery/blackrock v0.0.1 h1:lHQqhaaEFjgf5WkuItbpeCZv2DUIE45k0VbGJyft6LQ=
 github.com/projectdiscovery/blackrock v0.0.1/go.mod h1:ANUtjDfaVrqB453bzToU+YB4cUbvBRpLvEwoWIwlTss=
-github.com/projectdiscovery/goflags v0.1.49 h1:0e9wya431WDeVm8ZtlyqBQ+rwnhDjUswDMcS0did9Tg=
-github.com/projectdiscovery/goflags v0.1.49/go.mod h1:f0zRbaa5QLrjfJQ5v0efvq8EhkDGhCm9h0hsahjjKFc=
+github.com/projectdiscovery/goflags v0.1.51 h1:PhMekTX727L1YqBfP0of0clSygrq20RnWWp0+khAxqo=
+github.com/projectdiscovery/goflags v0.1.51/go.mod h1:muJxbcOFi4kzg0G30S526X6dY/OyuDInchYIkoZOudU=
 github.com/projectdiscovery/gologger v1.1.12 h1:uX/QkQdip4PubJjjG0+uk5DtyAi1ANPJUvpmimXqv4A=
 github.com/projectdiscovery/gologger v1.1.12/go.mod h1:DI8nywPLERS5mo8QEA9E7gd5HZ3Je14SjJBH3F5/kLw=
 github.com/projectdiscovery/machineid v0.0.0-20240226150047-2e2c51e35983 h1:ZScLodGSezQVwsQDtBSMFp72WDq0nNN+KE/5DHKY5QE=
@@ -141,8 +141,8 @@ github.com/projectdiscovery/mapcidr v1.1.34 h1:udr83vQ7oz3kEOwlsU6NC6o08leJzSDQt
 github.com/projectdiscovery/mapcidr v1.1.34/go.mod h1:1+1R6OkKSAKtWDXE9RvxXtXPoajXTYX0eiEdkqlhQqQ=
 github.com/projectdiscovery/retryabledns v1.0.58 h1:ut1FSB9+GZ6zQIlKJFLqIz2RZs81EmkbsHTuIrWfYLE=
 github.com/projectdiscovery/retryabledns v1.0.58/go.mod h1:RobmKoNBgngAVE4H9REQtaLP1pa4TCyypHy1MWHT1mY=
-github.com/projectdiscovery/utils v0.0.90 h1:ZBClkrtC6U2xuT8AI6/MrYgm3cxQnwSZmM8/tIlA0Yk=
-github.com/projectdiscovery/utils v0.0.90/go.mod h1:laZCMcUTT1vTmclUCW+zpi/fjeYsgU1gMwgv2CxNcRk=
+github.com/projectdiscovery/utils v0.0.91 h1:aHAAnC0qX9pJZrWq4Qpl2PSTYLrSCL1dm1QWLjprE2w=
+github.com/projectdiscovery/utils v0.0.91/go.mod h1:O/6U3ZoU+tNw4lKurdjyVMZPVXL5IYq0YeaDc15PRls=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
