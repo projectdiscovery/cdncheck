@@ -141,8 +141,8 @@ github.com/projectdiscovery/mapcidr v1.1.34 h1:udr83vQ7oz3kEOwlsU6NC6o08leJzSDQt
 github.com/projectdiscovery/mapcidr v1.1.34/go.mod h1:1+1R6OkKSAKtWDXE9RvxXtXPoajXTYX0eiEdkqlhQqQ=
 github.com/projectdiscovery/retryabledns v1.0.59 h1:8pMN+VibEBp29RIUior9LXUbx0RsBTjPC0008t2hfGU=
 github.com/projectdiscovery/retryabledns v1.0.59/go.mod h1:CwyQLDt9oqNIO/2ArALhAnUHJjZYdvJRSfGERRNPtoQ=
-github.com/projectdiscovery/utils v0.0.92 h1:lGCmjUJhzoNX4FQZWpp80058pRlD0/dYxLJOSs07EqY=
-github.com/projectdiscovery/utils v0.0.92/go.mod h1:d5uvD5qcRiK3qxZbBy9eatCqrCSuj9SObL04w/WgXSg=
+github.com/projectdiscovery/utils v0.0.93 h1:IMZFsmQFYZUf7rxpBoZj+53FsNDC/vHsXA+4B4GuGeg=
+github.com/projectdiscovery/utils v0.0.93/go.mod h1:2+mWzk5FeYdK9imo5eLk6oVeih0G0wsTff1pzBAh9tk=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
