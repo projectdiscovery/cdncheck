@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/gologger v1.1.12
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/retryabledns v1.0.62
-	github.com/projectdiscovery/utils v0.1.1
+	github.com/projectdiscovery/utils v0.1.3
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
 	github.com/yl2chen/cidranger v1.0.2
