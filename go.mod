@@ -1,9 +1,12 @@
 module github.com/projectdiscovery/cdncheck
 
-go 1.20
+go 1.21
+
+toolchain go1.21.3
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/gaissmai/bart v0.9.5
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
@@ -14,7 +17,6 @@ require (
 	github.com/projectdiscovery/utils v0.1.3
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
-	github.com/yl2chen/cidranger v1.0.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -28,6 +30,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/charmbracelet/glamour v0.6.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.4 // indirect
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08 // indirect
