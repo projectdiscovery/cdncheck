@@ -9,10 +9,10 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.56
-	github.com/projectdiscovery/gologger v1.1.12
+	github.com/projectdiscovery/gologger v1.1.16
 	github.com/projectdiscovery/mapcidr v1.1.34
-	github.com/projectdiscovery/retryabledns v1.0.64
-	github.com/projectdiscovery/utils v0.1.4
+	github.com/projectdiscovery/retryabledns v1.0.68
+	github.com/projectdiscovery/utils v0.2.3
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -45,7 +45,7 @@ require (
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.7 // indirect
+	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
