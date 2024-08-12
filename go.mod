@@ -11,7 +11,7 @@ require (
 	github.com/projectdiscovery/goflags v0.1.63
 	github.com/projectdiscovery/gologger v1.1.19
 	github.com/projectdiscovery/mapcidr v1.1.34
-	github.com/projectdiscovery/retryabledns v1.0.70
+	github.com/projectdiscovery/retryabledns v1.0.71
 	github.com/projectdiscovery/utils v0.2.5
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
