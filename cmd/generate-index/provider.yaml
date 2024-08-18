@@ -10,6 +10,8 @@ cdn:
 
   # urls contains a list of URLs for CDN providers
   urls:
+    gcore:
+      - https://api.gcore.com/cdn/public-ip-list
     cloudfront:
       - https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
     fastly:
