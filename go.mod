@@ -9,10 +9,10 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.63
-	github.com/projectdiscovery/gologger v1.1.19
+	github.com/projectdiscovery/gologger v1.1.21
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/retryabledns v1.0.71
-	github.com/projectdiscovery/utils v0.2.5
+	github.com/projectdiscovery/utils v0.2.6
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
 	gopkg.in/yaml.v3 v3.0.1
