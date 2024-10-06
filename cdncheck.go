@@ -144,6 +144,10 @@ func (c *Client) CheckDNSResponse(dnsResponse *retryabledns.DNSData) (matched bo
 	return false, "", "", err
 }
 
+func (c *Client) GetDnsData(domain string) (*retryabledns.DNSData, error) {
+	return c.retriabledns.Resolve(domain)
+}
+
 func mapKeys(m map[string][]string) string {
 	keys := make([]string, 0, len(m))
 	for k := range m {

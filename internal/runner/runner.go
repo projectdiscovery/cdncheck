@@ -197,18 +197,22 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	var provider, itemType string
 	var err error
 
+	var targetIp string
 	if iputils.IsIP(item) {
-		targetIP := net.ParseIP(item)
-		matched, provider, itemType, err = r.cdnclient.Check(targetIP)
+		matched, provider, itemType, err = r.cdnclient.Check(net.ParseIP(item))
+		targetIp = item
 	} else {
 		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
+		if dnsData, err := r.cdnclient.GetDnsData(item); err == nil && len(dnsData.A) > 0 {
+			targetIp = dnsData.A[0]
+		}
 	}
 	if err != nil && r.options.Verbose {
 		gologger.Error().Msgf("Could not check domain cdn %s: %s", item, err)
 	}
 
 	data.itemType = itemType
-	data.IP = item
+	data.IP = targetIp
 	data.Timestamp = time.Now()
 
 	if r.options.Exclude {
