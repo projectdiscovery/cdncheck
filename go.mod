@@ -1,20 +1,20 @@
 module github.com/projectdiscovery/cdncheck
 
-go 1.20
+go 1.21
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/gaissmai/bart v0.9.5
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/goflags v0.1.55
-	github.com/projectdiscovery/gologger v1.1.12
+	github.com/projectdiscovery/goflags v0.1.64
+	github.com/projectdiscovery/gologger v1.1.22
 	github.com/projectdiscovery/mapcidr v1.1.34
-	github.com/projectdiscovery/retryabledns v1.0.63
-	github.com/projectdiscovery/utils v0.1.3
+	github.com/projectdiscovery/retryabledns v1.0.74
+	github.com/projectdiscovery/utils v0.2.8
 	github.com/stretchr/testify v1.9.0
 	github.com/weppos/publicsuffix-go v0.30.1
-	github.com/yl2chen/cidranger v1.0.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -28,6 +28,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/charmbracelet/glamour v0.6.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.4 // indirect
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08 // indirect
@@ -44,7 +45,7 @@ require (
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.7 // indirect
+	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
