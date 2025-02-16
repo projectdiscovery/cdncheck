@@ -51,6 +51,16 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Pull latest changes
+        run: git pull origin ${{ github.ref }}
+
+      - name: Get latest version bump commit
+        id: get_latest_commit
+        run: |
+          git pull origin ${{ github.ref }}
+          echo "LATEST_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Get Commit Count
         id: get_commit
@@ -62,6 +72,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.PDTEAMX_PAT }}
+          commit_sha: ${{ steps.get_latest_commit.outputs.LATEST_COMMIT }}
 
       - name: Create a GitHub release
         if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0  }}
