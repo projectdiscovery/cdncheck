@@ -14,7 +14,7 @@ const banner = `
 `
 
 // version is the current version of cdncheck
-const version = `v1.1.8`
+const version = `v1.1.9`
 
 // showBanner is used to show the banner to the user
 func showBanner() {
