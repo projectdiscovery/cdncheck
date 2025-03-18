@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/ipinfo/go/v2/ipinfo"
@@ -144,7 +145,7 @@ retry:
 		return nil, err
 	}
 	// if the body type is HTML, retry with the first json link in the page (special case for Azure download page to find changing URLs)
-	if resp.Header.Get("Content-Type") == "text/html" && !retried {
+	if strings.HasPrefix(resp.Header.Get("Content-Type"), "text/html") && !retried {
 		var extractedURL string
 		docReader, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 		if err != nil {
