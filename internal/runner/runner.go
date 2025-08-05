@@ -185,14 +185,6 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		Input:  item,
 	}
 
-	if iputils.IsIPv6(item) {
-		// TODO: IPv6 support refer issue #59
-		if r.options.Verbose {
-			gologger.Error().Msgf("IPv6 is not supported: %s", item)
-		}
-		return
-	}
-
 	var matched bool
 	var provider, itemType string
 	var err error
