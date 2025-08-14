@@ -171,19 +171,28 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 			return
 		}
 		for cidr := range cidrInputs {
-			r.processInputItemIpOrDomain(cidr, output)
+			r.processInputItemSingle(cidr, output)
 		}
 	} else {
 		// Normal input
-		r.processInputItemIpOrDomain(input, output)
+		r.processInputItemSingle(input, output)
 	}
 }
 
-func (r *Runner) processInputItemIpOrDomain(item string, output chan Output) {
+func (r *Runner) processInputItemSingle(item string, output chan Output) {
+	var datas []Output
+	baseData := Output{
+		aurora: r.aurora,
+		Input:  item,
+	}
+
+	var matched bool
+	var provider, itemType string
+	var err error
 
 	var targetIps []string
-
 	if iputils.IsIP(item) {
+		matched, provider, itemType, err = r.cdnclient.Check(net.ParseIP(item))
 		targetIps = append(targetIps, item)
 	} else {
 		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
@@ -192,80 +201,61 @@ func (r *Runner) processInputItemIpOrDomain(item string, output chan Output) {
 		if err == nil {
 			if len(dnsData.AAAA) > 0 {
 				targetIps = append(targetIps, dnsData.AAAA...)
-			}
-			if len(dnsData.A) > 0 {
+			} else if len(dnsData.A) > 0 {
 				targetIps = append(targetIps, dnsData.A...)
 			}
 		}
 	}
-
-	for _, targetIp := range targetIps {
-		r.processInputItemSingle(targetIp, output)
-	}
-}
-
-func (r *Runner) processInputItemSingle(ip string, output chan Output) {
-	data := Output{
-		aurora: r.aurora,
-		Input:  ip,
-	}
-
-	var matched bool
-	var provider, itemType string
-	var err error
-
-	var targetIp string
-	if iputils.IsIP(ip) {
-		matched, provider, itemType, err = r.cdnclient.Check(net.ParseIP(ip))
-		targetIp = ip
-	} else {
-		gologger.Error().Msgf(
-			"processInputItemSingle cannot accept a non ip value: '%s'",
-			ip,
-		)
-		return
-	}
 	if err != nil && r.options.Verbose {
-		gologger.Error().Msgf("Could not check domain cdn %s: %s", ip, err)
+		gologger.Error().Msgf("Could not check domain cdn %s: %s", item, err)
 	}
 
-	data.itemType = itemType
-	data.IP = targetIp
-	data.Timestamp = time.Now()
+	baseData.itemType = itemType
+	baseData.Timestamp = time.Now()
 
 	if r.options.Exclude {
 		if !matched {
-			output <- data
+			output <- baseData
 		}
 		return
 	}
 
 	switch itemType {
 	case "cdn":
-		data.Cdn = matched
-		data.CdnName = provider
+		baseData.Cdn = matched
+		baseData.CdnName = provider
 	case "cloud":
-		data.Cloud = matched
-		data.CloudName = provider
+		baseData.Cloud = matched
+		baseData.CloudName = provider
 	case "waf":
-		data.Waf = matched
-		data.WafName = provider
+		baseData.Waf = matched
+		baseData.WafName = provider
 	}
-	if skipped := filterIP(r.options, data); skipped {
-		return
+
+	for _, targetIp := range targetIps {
+		data := baseData
+		data.IP = targetIp
+		datas = append(datas, data)
 	}
-	if matched := matchIP(r.options, data); !matched {
-		return
-	}
-	switch {
-	case r.options.Cdn && data.itemType == "cdn", r.options.Cloud && data.itemType == "cloud", r.options.Waf && data.itemType == "waf":
-		{
-			output <- data
+
+	for _, data := range datas {
+		if skipped := filterIP(r.options, data); skipped {
+			continue
 		}
-	case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && matched:
-		{
-			output <- data
+		if matched := matchIP(r.options, data); !matched {
+			continue
 		}
+		switch {
+		case r.options.Cdn && data.itemType == "cdn", r.options.Cloud && data.itemType == "cloud", r.options.Waf && data.itemType == "waf":
+			{
+				output <- data
+			}
+		case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && matched:
+			{
+				output <- data
+			}
+		}
+
 	}
 }
 
