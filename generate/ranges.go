@@ -45,5 +45,5 @@ func scrapeIncapsula(httpClient *http.Client) ([]string, error) {
 	if len(cidrs) == 0 {
 		return nil, errNoCidrFound
 	}
-	return validateCidrs(cidrs), nil
+	return getValidateCidrs(cidrs), nil
 }
