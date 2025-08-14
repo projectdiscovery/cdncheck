@@ -14,6 +14,11 @@ type TestCase struct {
 }
 
 var TestCases = []TestCase{
+	{Target: "2400:cb00::1", Expected: []string{"2400:cb00::1 [waf] [cloudflare]"}, Args: "-resp -waf -nc"},
+	{Target: "2400:cb00::1", Expected: []string{"2400:cb00::1"}, Args: "-nc"},
+	{Target: "2600:9000:5206::", Expected: []string{"2600:9000:5206:: [cloud] [aws]"}, Args: "-resp -nc"},
+	{Target: "2600:9000:5206::", Expected: []string{"2600:9000:5206:: [cloud] [aws]"}, Args: "-resp -cloud -nc"},
+
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183"}, Args: "-nc"},
 	{Target: "projectdiscovery.io", Expected: []string{"projectdiscovery.io"}, Args: "-nc"},
 	{Target: "gslink.hackerone.com", Expected: []string{"gslink.hackerone.com"}, Args: "-nc"},
@@ -32,5 +37,4 @@ var TestCases = []TestCase{
 		}
 		return errorutils.New("expected %v belong to %v cdn but got: %v", target, cdn, got)
 	}},
-	{Target: "2a04:4e42:ff1::169:a86d", Expected: []string{"2a04:4e42:ff1::169:a86d [cdn] [fastly]"}, Args: "-resp"},
 }
