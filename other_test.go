@@ -52,7 +52,7 @@ func TestCheckDNSResponse(t *testing.T) {
 	client := New()
 	defaultResolvers := []string{
 		"[2001:4860:4860::8888]:53",
-		"[2001:4860:4860::8844]:53",
+		"[2001:4860:4860::8800]:53",
 
 		"8.8.8.8",
 		"8.8.0.0",
