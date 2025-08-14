@@ -180,8 +180,7 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 }
 
 func (r *Runner) processInputItemSingle(item string, output chan Output) {
-	var datas []Output
-	baseData := Output{
+	data := Output{
 		aurora: r.aurora,
 		Input:  item,
 	}
@@ -190,19 +189,19 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	var provider, itemType string
 	var err error
 
-	var targetIps []string
+	var targetIp string
 	if iputils.IsIP(item) {
 		matched, provider, itemType, err = r.cdnclient.Check(net.ParseIP(item))
-		targetIps = append(targetIps, item)
+		targetIp = item
 	} else {
 		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
 		dnsData, err := r.cdnclient.GetDnsData(item)
 
 		if err == nil {
 			if len(dnsData.AAAA) > 0 {
-				targetIps = append(targetIps, dnsData.AAAA...)
+				targetIp = dnsData.AAAA[0]
 			} else if len(dnsData.A) > 0 {
-				targetIps = append(targetIps, dnsData.A...)
+				targetIp = dnsData.A[0]
 			}
 		}
 	}
@@ -210,52 +209,43 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		gologger.Error().Msgf("Could not check domain cdn %s: %s", item, err)
 	}
 
-	baseData.itemType = itemType
-	baseData.Timestamp = time.Now()
+	data.itemType = itemType
+	data.IP = targetIp
+	data.Timestamp = time.Now()
 
 	if r.options.Exclude {
 		if !matched {
-			output <- baseData
+			output <- data
 		}
 		return
 	}
 
 	switch itemType {
 	case "cdn":
-		baseData.Cdn = matched
-		baseData.CdnName = provider
+		data.Cdn = matched
+		data.CdnName = provider
 	case "cloud":
-		baseData.Cloud = matched
-		baseData.CloudName = provider
+		data.Cloud = matched
+		data.CloudName = provider
 	case "waf":
-		baseData.Waf = matched
-		baseData.WafName = provider
+		data.Waf = matched
+		data.WafName = provider
 	}
-
-	for _, targetIp := range targetIps {
-		data := baseData
-		data.IP = targetIp
-		datas = append(datas, data)
+	if skipped := filterIP(r.options, data); skipped {
+		return
 	}
-
-	for _, data := range datas {
-		if skipped := filterIP(r.options, data); skipped {
-			continue
+	if matched := matchIP(r.options, data); !matched {
+		return
+	}
+	switch {
+	case r.options.Cdn && data.itemType == "cdn", r.options.Cloud && data.itemType == "cloud", r.options.Waf && data.itemType == "waf":
+		{
+			output <- data
 		}
-		if matched := matchIP(r.options, data); !matched {
-			continue
+	case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && matched:
+		{
+			output <- data
 		}
-		switch {
-		case r.options.Cdn && data.itemType == "cdn", r.options.Cloud && data.itemType == "cloud", r.options.Waf && data.itemType == "waf":
-			{
-				output <- data
-			}
-		case (!r.options.Cdn && !r.options.Waf && !r.options.Cloud) && matched:
-			{
-				output <- data
-			}
-		}
-
 	}
 }
 
