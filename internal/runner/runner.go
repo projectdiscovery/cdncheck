@@ -171,18 +171,43 @@ func (r *Runner) processInputItem(input string, output chan Output) {
 			return
 		}
 		for cidr := range cidrInputs {
-			r.processInputItemSingle(cidr, output)
+			r.processInputItemIpOrDomain(cidr, output)
 		}
 	} else {
 		// Normal input
-		r.processInputItemSingle(input, output)
+		r.processInputItemIpOrDomain(input, output)
 	}
 }
 
-func (r *Runner) processInputItemSingle(item string, output chan Output) {
+func (r *Runner) processInputItemIpOrDomain(item string, output chan Output) {
+
+	var targetIps []string
+
+	if iputils.IsIP(item) {
+		targetIps = append(targetIps, item)
+	} else {
+		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
+		dnsData, err := r.cdnclient.GetDnsData(item)
+
+		if err == nil {
+			if len(dnsData.AAAA) > 0 {
+				targetIps = append(targetIps, dnsData.AAAA...)
+			}
+			if len(dnsData.A) > 0 {
+				targetIps = append(targetIps, dnsData.A...)
+			}
+		}
+	}
+
+	for _, targetIp := range targetIps {
+		r.processInputItemSingle(targetIp, output)
+	}
+}
+
+func (r *Runner) processInputItemSingle(ip string, output chan Output) {
 	data := Output{
 		aurora: r.aurora,
-		Input:  item,
+		Input:  ip,
 	}
 
 	var matched bool
@@ -190,17 +215,18 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	var err error
 
 	var targetIp string
-	if iputils.IsIP(item) {
-		matched, provider, itemType, err = r.cdnclient.Check(net.ParseIP(item))
-		targetIp = item
+	if iputils.IsIP(ip) {
+		matched, provider, itemType, err = r.cdnclient.Check(net.ParseIP(ip))
+		targetIp = ip
 	} else {
-		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
-		if dnsData, err := r.cdnclient.GetDnsData(item); err == nil && len(dnsData.A) > 0 {
-			targetIp = dnsData.A[0]
-		}
+		gologger.Error().Msgf(
+			"processInputItemSingle cannot accept a non ip value: '%s'",
+			ip,
+		)
+		return
 	}
 	if err != nil && r.options.Verbose {
-		gologger.Error().Msgf("Could not check domain cdn %s: %s", item, err)
+		gologger.Error().Msgf("Could not check domain cdn %s: %s", ip, err)
 	}
 
 	data.itemType = itemType

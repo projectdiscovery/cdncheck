@@ -16,6 +16,11 @@ var (
 
 // DefaultResolvers trusted (taken from fastdialer)
 var DefaultResolvers = []string{
+	"[2606:4700:4700::1111]:53",
+	"[2606:4700:4700::1001]:53",
+	"[2001:4860:4860::8888]:53",
+	"[2001:4860:4860::8844]:53",
+
 	"1.1.1.1:53",
 	"1.0.0.1:53",
 	"8.8.8.8:53",
@@ -116,6 +121,21 @@ func (c *Client) CheckDomainWithFallback(domain string) (matched bool, value str
 
 // CheckDNSResponse is same as CheckDomainWithFallback but takes DNS response as input
 func (c *Client) CheckDNSResponse(dnsResponse *retryabledns.DNSData) (matched bool, value string, itemType string, err error) {
+	if dnsResponse.AAAA != nil {
+		for _, ip := range dnsResponse.AAAA {
+			ipAddr := net.ParseIP(ip)
+			if ipAddr == nil {
+				continue
+			}
+			matched, value, itemType, err := c.Check(ipAddr)
+			if err != nil {
+				return false, "", "", err
+			}
+			if matched {
+				return matched, value, itemType, nil
+			}
+		}
+	}
 	if dnsResponse.A != nil {
 		for _, ip := range dnsResponse.A {
 			ipAddr := net.ParseIP(ip)
