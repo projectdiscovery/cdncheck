@@ -16,8 +16,8 @@ type TestCase struct {
 var TestCases = []TestCase{
 	{Target: "2400:cb00::1", Expected: []string{"2400:cb00::1 [waf] [cloudflare]"}, Args: "-resp -waf -nc"},
 	{Target: "2400:cb00::1", Expected: []string{"2400:cb00::1"}, Args: "-nc"},
-	{Target: "2600:9000:5206::", Expected: []string{"2600:9000:5206:: [cloud] [aws]"}, Args: "-resp -nc"},
-	{Target: "2600:9000:5206::", Expected: []string{"2600:9000:5206:: [cloud] [aws]"}, Args: "-resp -cloud -nc"},
+	{Target: "2600:9000:5206::1", Expected: []string{"2600:9000:5206::1 [cloud] [aws]"}, Args: "-resp -nc"},
+	{Target: "2600:9000:5206::1", Expected: []string{"2600:9000:5206::1 [cloud] [aws]"}, Args: "-resp -cloud -nc"},
 
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183"}, Args: "-nc"},
 	{Target: "projectdiscovery.io", Expected: []string{"projectdiscovery.io"}, Args: "-nc"},
