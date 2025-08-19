@@ -18,8 +18,6 @@ cdn:
       - https://api.fastly.com/public-ip-list
     google:
       - https://www.gstatic.com/ipranges/goog.json
-    stackpath:
-      - https://k3t9x2h3.map2.ssl.hwcdn.net/ipblocks.txt
     gocache:
       - https://gocache.com.br/ips
   cidr:
