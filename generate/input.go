@@ -26,7 +26,7 @@ func getValidateCidrs(cidrs []string) []string {
 		if err == nil {
 			output = append(output, cidr)
 		} else {
-			fmt.Printf("skipping '%v' err: %v", cidr, err)
+			fmt.Printf("skipping '%v' err: %v\n", cidr, err)
 		}
 	}
 
