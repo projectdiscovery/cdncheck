@@ -50,12 +50,34 @@ func TestCheckDomainWithFallback(t *testing.T) {
 
 func TestCheckDNSResponse(t *testing.T) {
 	client := New()
-	defaultResolvers := []string{"8.8.8.8", "8.8.0.0"}
+	defaultResolvers := []string{
+		"[2001:4860:4860::8888]:53",
+		"[2001:4860:4860::8800]:53",
+
+		"8.8.8.8",
+		"8.8.0.0",
+	}
 	defaultMaxRetries := 3
+
 	retryabledns, _ := retryabledns.New(defaultResolvers, defaultMaxRetries)
+
 	dnsData, _ := retryabledns.Resolve("hackerone.com")
+	dnsData.A = nil
 
 	valid, provider, itemType, err := client.CheckDNSResponse(dnsData)
+
+	require.Nil(t, err, "could not check cname")
+	require.True(t, valid, "could not get valid cname")
+	require.Equal(t, "cloudflare", provider, "could not get correct provider")
+	require.Equal(t, "waf", itemType, "could not get correct itemType")
+
+
+
+
+	dnsData, _ = retryabledns.Resolve("hackerone.com")
+	dnsData.AAAA = nil
+
+	valid, provider, itemType, err = client.CheckDNSResponse(dnsData)
 
 	require.Nil(t, err, "could not check cname")
 	require.True(t, valid, "could not get valid cname")

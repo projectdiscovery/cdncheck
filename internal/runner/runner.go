@@ -185,14 +185,6 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		Input:  item,
 	}
 
-	if iputils.IsIPv6(item) {
-		// TODO: IPv6 support refer issue #59
-		if r.options.Verbose {
-			gologger.Error().Msgf("IPv6 is not supported: %s", item)
-		}
-		return
-	}
-
 	var matched bool
 	var provider, itemType string
 	var err error
@@ -203,8 +195,14 @@ func (r *Runner) processInputItemSingle(item string, output chan Output) {
 		targetIp = item
 	} else {
 		matched, provider, itemType, err = r.cdnclient.CheckDomainWithFallback(item)
-		if dnsData, err := r.cdnclient.GetDnsData(item); err == nil && len(dnsData.A) > 0 {
-			targetIp = dnsData.A[0]
+		dnsData, err := r.cdnclient.GetDnsData(item)
+
+		if err == nil {
+			if len(dnsData.AAAA) > 0 {
+				targetIp = dnsData.AAAA[0]
+			} else if len(dnsData.A) > 0 {
+				targetIp = dnsData.A[0]
+			}
 		}
 	}
 	if err != nil && r.options.Verbose {
