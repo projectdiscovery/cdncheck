@@ -5,6 +5,8 @@ import (
 
 	"github.com/projectdiscovery/retryabledns"
 	"github.com/stretchr/testify/require"
+
+	"github.com/miekg/dns"
 )
 
 func TestCheckSuffix(t *testing.T) {
@@ -48,12 +50,44 @@ func TestCheckDomainWithFallback(t *testing.T) {
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
 }
 
-func TestCheckDNSResponse(t *testing.T) {
+func TestCheckDNSResponseIPv6(t *testing.T) {
 	client := New()
-	defaultResolvers := []string{"8.8.8.8", "8.8.0.0"}
+	defaultResolvers := []string{
+		"[2001:4860:4860::8888]:53",
+		"[2001:4860:4860::8800]:53",
+
+		"8.8.8.8",
+		"8.8.0.0",
+	}
 	defaultMaxRetries := 3
+
 	retryabledns, _ := retryabledns.New(defaultResolvers, defaultMaxRetries)
-	dnsData, _ := retryabledns.Resolve("hackerone.com")
+
+	dnsData, _ := retryabledns.QueryMultiple("hackerone.com", []uint16{dns.TypeAAAA})
+
+	valid, provider, itemType, err := client.CheckDNSResponse(dnsData)
+
+	require.Nil(t, err, "could not check cname")
+	require.True(t, valid, "could not get valid cname")
+	require.Equal(t, "cloudflare", provider, "could not get correct provider")
+	require.Equal(t, "waf", itemType, "could not get correct itemType")
+}
+
+
+func TestCheckDNSResponseIPv4(t *testing.T) {
+	client := New()
+	defaultResolvers := []string{
+		"[2001:4860:4860::8888]:53",
+		"[2001:4860:4860::8800]:53",
+
+		"8.8.8.8",
+		"8.8.0.0",
+	}
+	defaultMaxRetries := 3
+
+	retryabledns, _ := retryabledns.New(defaultResolvers, defaultMaxRetries)
+
+	dnsData, _ := retryabledns.QueryMultiple("hackerone.com", []uint16{dns.TypeA})
 
 	valid, provider, itemType, err := client.CheckDNSResponse(dnsData)
 
