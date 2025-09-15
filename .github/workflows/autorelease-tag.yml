@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  tag:
+  bump-version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,17 +19,20 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21.x
-      
+
       - name: Bump version in banner.go
+        working-directory: internal/runner
         run: |
           curl -LO https://raw.githubusercontent.com/projectdiscovery/utils/main/scripts/versionbump/versionbump.go
-          go run versionbump.go -file internal/runner/banner.go -var version -part patch
-      
+          go run versionbump.go -file banner.go -var version -part patch
+
       - name: Create local changes
+        working-directory: internal/runner
         run: |
-          git add internal/runner/banner.go
+          git add banner.go
 
       - name: Commit files
+        working-directory: internal/runner
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -41,6 +44,24 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
+  tag-release:
+    runs-on: ubuntu-latest
+    needs: bump-version
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Pull latest changes
+        run: git pull origin ${{ github.ref }}
+
+      - name: Get latest version bump commit
+        id: get_latest_commit
+        run: |
+          git pull origin ${{ github.ref }}
+          echo "LATEST_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
       - name: Get Commit Count
         id: get_commit
         run: git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count | xargs -I {} echo COMMIT_COUNT={} >> $GITHUB_OUTPUT
@@ -51,7 +72,8 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.PDTEAMX_PAT }}
-          
+          commit_sha: ${{ steps.get_latest_commit.outputs.LATEST_COMMIT }}
+
       - name: Create a GitHub release
         if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0  }}
         uses: actions/create-release@v1
