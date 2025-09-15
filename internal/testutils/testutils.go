@@ -3,7 +3,7 @@ package testutils
 import (
 	"strings"
 
-	errorutils "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 )
 
 type TestCase struct {
@@ -30,6 +30,6 @@ var TestCases = []TestCase{
 		if len(got) == 1 && strings.Contains(got[0], cdn) {
 			return nil
 		}
-		return errorutils.New("expected %v belong to %v cdn but got: %v", target, cdn, got)
+		return errkit.Newf("expected %v belong to %v cdn but got: %v", target, cdn, got)
 	}},
 }
