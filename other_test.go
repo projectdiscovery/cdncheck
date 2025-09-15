@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/projectdiscovery/retryabledns"
+	stringsutil "github.com/projectdiscovery/utils/strings"
 	"github.com/stretchr/testify/require"
 
 	"github.com/miekg/dns"
@@ -44,10 +45,19 @@ func TestCheckDomainWithFallback(t *testing.T) {
 	client := New()
 
 	valid, provider, itemType, err := client.CheckDomainWithFallback("www.gap.com")
+	// skip if ipv6 not enabled
+	if isIPv6Error(err) {
+		t.Skip("ipv6 not enabled")
+		return
+	}
 	require.Nil(t, err, "could not check")
 	require.True(t, valid, "could not check domain")
 	require.Equal(t, "akamai", provider, "could not get correct provider")
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
+}
+
+func isIPv6Error(err error) bool {
+	return err != nil && stringsutil.ContainsAnyI(err.Error(), "no route to host")
 }
 
 func TestCheckDNSResponseIPv6(t *testing.T) {
@@ -73,7 +83,6 @@ func TestCheckDNSResponseIPv6(t *testing.T) {
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
 }
 
-
 func TestCheckDNSResponseIPv4(t *testing.T) {
 	client := New()
 	defaultResolvers := []string{
@@ -96,8 +105,12 @@ func TestCheckDNSResponseIPv4(t *testing.T) {
 	require.Equal(t, "cloudflare", provider, "could not get correct provider")
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
 
-	dnsData, _ = retryabledns.CNAME("www.gap.com")
-
+	dnsData, err = retryabledns.CNAME("www.gap.com")
+	// skip if ipv6 not enabled
+	if isIPv6Error(err) {
+		t.Skip("ipv6 not enabled")
+		return
+	}
 	valid, provider, itemType, err = client.CheckDNSResponse(dnsData)
 	require.Nil(t, err, "could not check")
 	require.True(t, valid, "could not check domain")
