@@ -3,7 +3,7 @@ package testutils
 import (
 	"strings"
 
-	errorutils "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 )
 
 type TestCase struct {
@@ -20,6 +20,8 @@ var TestCases = []TestCase{
 	{Target: "2600:9000:5206::1", Expected: []string{"2600:9000:5206::1 [cloud] [aws]"}, Args: "-resp -cloud -nc"},
 
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183"}, Args: "-nc"},
+	{Target: "cloudflare.com", Expected: []string{"cloudflare.com"}, Args: "-nc"},
+	{Target: "gslink.hackerone.com", Expected: []string{"gslink.hackerone.com"}, Args: "-nc"},
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183 [cloud] [aws]"}, Args: "-resp -nc"},
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183 [cloud] [aws]"}, Args: "-resp -cloud -nc"},
 	{Target: "104.16.51.111", Expected: []string{"104.16.51.111 [waf] [cloudflare]"}, Args: "-resp -waf -nc"},
@@ -31,11 +33,11 @@ var TestCases = []TestCase{
 
 	{Target: "projectdiscovery.io", Expected: []string{"projectdiscovery.io"}, Args: "-nc"},
 	{Target: "gslink.hackerone.com", Expected: []string{"gslink.hackerone.com"}, Args: "-nc"},
-	{Target: "projectdiscovery.io", Expected: nil, Args: "-resp -nc", CompareFunc: func(target string, got []string) error {
+	{Target: "cloudflare.com", Expected: nil, Args: "-resp -nc", CompareFunc: func(target string, got []string) error {
 		cdn := "cloudflare"
 		if len(got) == 1 && strings.Contains(got[0], cdn) {
 			return nil
 		}
-		return errorutils.New("expected %v belong to %v cdn but got: %v", target, cdn, got)
+		return errkit.Newf("expected %v belong to %v cdn but got: %v", target, cdn, got)
 	}},
 }

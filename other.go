@@ -20,7 +20,7 @@ var cdnWappalyzerTechnologies = map[string]string{
 
 // CheckFQDN checks if fqdns are known cloud ones
 func (c *Client) CheckSuffix(fqdns ...string) (isCDN bool, provider string, itemType string, err error) {
-	c.Once.Do(func() {
+	c.Do(func() {
 		suffixToSource = make(map[string]string)
 		for source, suffixes := range generatedData.Common {
 			for _, suffix := range suffixes {

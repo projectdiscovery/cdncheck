@@ -153,14 +153,17 @@ retry:
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	// if the body type is HTML, retry with the first json link in the page (special case for Azure download page to find changing URLs)
-	if resp.Header.Get("Content-Type") == "text/html" && !retried {
+	if stringsutil.ContainsAnyI(resp.Header.Get("Content-Type"), "text/html") && !retried {
 		var extractedURL string
 		docReader, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 		if err != nil {
