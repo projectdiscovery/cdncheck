@@ -50,7 +50,7 @@ func TestCheckDomainWithFallback(t *testing.T) {
 		t.Skip("ipv6 not enabled")
 		return
 	}
-	require.Nil(t, err, "could not check")
+	require.Nil(t, err, "could not check: %v", err)
 	require.True(t, valid, "could not check domain")
 	require.Equal(t, "akamai", provider, "could not get correct provider")
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
@@ -77,7 +77,7 @@ func TestCheckDNSResponseIPv6(t *testing.T) {
 
 	valid, provider, itemType, err := client.CheckDNSResponse(dnsData)
 
-	require.Nil(t, err, "could not check cname")
+	require.Nil(t, err, "could not check cname: %v", err)
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "cloudflare", provider, "could not get correct provider")
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
@@ -100,7 +100,7 @@ func TestCheckDNSResponseIPv4(t *testing.T) {
 
 	valid, provider, itemType, err := client.CheckDNSResponse(dnsData)
 
-	require.Nil(t, err, "could not check cname")
+	require.Nil(t, err, "could not check cname: %v", err)
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "cloudflare", provider, "could not get correct provider")
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
@@ -112,7 +112,7 @@ func TestCheckDNSResponseIPv4(t *testing.T) {
 		return
 	}
 	valid, provider, itemType, err = client.CheckDNSResponse(dnsData)
-	require.Nil(t, err, "could not check")
+	require.Nil(t, err, "could not check: %v", err)
 	require.True(t, valid, "could not check domain")
 	require.Equal(t, "akamai", provider, "could not get correct provider")
 	require.Equal(t, "waf", itemType, "could not get correct itemType")
