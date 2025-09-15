@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/projectdiscovery/cdncheck"
 	"github.com/projectdiscovery/cdncheck/generate"
+	"github.com/projectdiscovery/utils/errkit"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,7 +49,9 @@ func process() error {
 	if err != nil {
 		return errors.Wrap(err, "could not create output file")
 	}
-	defer outputFile.Close()
+	defer func() {
+		_ = outputFile.Close()
+	}()
 
 	data := cdncheck.InputCompiled{}
 	if len(compiled.Common) > 0 {
@@ -91,9 +94,11 @@ func process() error {
 func parseCategoriesFromFile() (*generate.Categories, error) {
 	file, err := os.Open(*input)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not read input.yaml file")
+		return nil, errkit.Wrap(err, "could not read input.yaml file")
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	categories := &generate.Categories{}
 	if err := yaml.NewDecoder(file).Decode(categories); err != nil {

@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/projectdiscovery/cdncheck"
-	errorutil "github.com/projectdiscovery/utils/errors"
+	"github.com/projectdiscovery/utils/errkit"
 )
 
 var libraryTestcases = map[string]TestCase{
@@ -22,7 +22,7 @@ func (h *goIntegrationTest) Execute() error {
 		return err
 	}
 	if matched {
-		return errorutil.New("Expected %v is WAF, but got %v", ip, val)
+		return errkit.Newf("Expected %v is WAF, but got %v", ip, val)
 	}
 	// checks if an IP is contained in the cloud denylist
 	matched, val, err = client.CheckCloud(ip)
@@ -30,7 +30,7 @@ func (h *goIntegrationTest) Execute() error {
 		return err
 	}
 	if matched {
-		return errorutil.New("Expected %v is WAF, but got %v", ip, val)
+		return errkit.Newf("Expected %v is WAF, but got %v", ip, val)
 	}
 	// checks if an IP is contained in the waf denylist
 	matched, val, err = client.CheckWAF(ip)
@@ -38,7 +38,7 @@ func (h *goIntegrationTest) Execute() error {
 		return err
 	}
 	if !matched {
-		return errorutil.New("Expected %v WAF is cloudflare, but got %v", ip, val)
+		return errkit.Newf("Expected %v WAF is cloudflare, but got %v", ip, val)
 	}
 	return err
 }
