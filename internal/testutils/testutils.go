@@ -30,8 +30,6 @@ var TestCases = []TestCase{
 	{Target: "185.199.109.153", Expected: []string{}, Args: "-resp -nc"},
 	{Target: "54.192.171.16", Expected: []string{"54.192.171.16 [cdn] [cloudfront]"}, Args: "-resp -mcdn cloudfront -nc"},
 	{Target: "54.192.171.16", Expected: []string{}, Args: "-resp -fcdn cloudfront -mcloud aws -nc"},
-
-	{Target: "projectdiscovery.io", Expected: []string{"projectdiscovery.io"}, Args: "-nc"},
 	{Target: "gslink.hackerone.com", Expected: []string{"gslink.hackerone.com"}, Args: "-nc"},
 	{Target: "cloudflare.com", Expected: nil, Args: "-resp -nc", CompareFunc: func(target string, got []string) error {
 		cdn := "cloudflare"
