@@ -15,7 +15,7 @@ type TestCase struct {
 
 var TestCases = []TestCase{
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183"}, Args: "-nc"},
-	{Target: "projectdiscovery.io", Expected: []string{"projectdiscovery.io"}, Args: "-nc"},
+	{Target: "cloudflare.com", Expected: []string{"cloudflare.com"}, Args: "-nc"},
 	{Target: "gslink.hackerone.com", Expected: []string{"gslink.hackerone.com"}, Args: "-nc"},
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183 [cloud] [aws]"}, Args: "-resp -nc"},
 	{Target: "52.60.165.183", Expected: []string{"52.60.165.183 [cloud] [aws]"}, Args: "-resp -cloud -nc"},
@@ -25,7 +25,7 @@ var TestCases = []TestCase{
 	{Target: "185.199.109.153", Expected: []string{}, Args: "-resp -nc"},
 	{Target: "54.192.171.16", Expected: []string{"54.192.171.16 [cdn] [cloudfront]"}, Args: "-resp -mcdn cloudfront -nc"},
 	{Target: "54.192.171.16", Expected: []string{}, Args: "-resp -fcdn cloudfront -mcloud aws -nc"},
-	{Target: "projectdiscovery.io", Expected: nil, Args: "-resp -nc", CompareFunc: func(target string, got []string) error {
+	{Target: "cloudflare.com", Expected: nil, Args: "-resp -nc", CompareFunc: func(target string, got []string) error {
 		cdn := "cloudflare"
 		if len(got) == 1 && strings.Contains(got[0], cdn) {
 			return nil
