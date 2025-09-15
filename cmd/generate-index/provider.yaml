@@ -27,6 +27,8 @@ cdn:
       - https://gocache.com.br/ips
     arvancloud:
       - https://www.arvancloud.ir/fa/ips.txt
+
+  # cidr contains the CIDR ranges for providers
   cidr:
     cafe24: # Korea
       - "14.128.128.0/17"
@@ -121,9 +123,6 @@ cdn:
       - "203.235.224.0/19"
       - "203.242.64.0/19"
       - "203.242.120.0/21"
-
-  # cidr contains the CIDR ranges for providers
-  cidr:
     百度云加速:
       - "101.227.206.0/24"
       - "101.227.207.0/24"
