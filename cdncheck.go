@@ -4,6 +4,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/projectdiscovery/retryabledns"
 )
@@ -14,17 +15,39 @@ var (
 	DefaultCloudProviders string
 )
 
-// DefaultResolvers trusted (taken from fastdialer)
+// DefaultResolvers trusted (taken from fastdialer) - IPv4 only
 var DefaultResolvers = []string{
-	"[2606:4700:4700::1111]:53",
-	"[2606:4700:4700::1001]:53",
-	"[2001:4860:4860::8888]:53",
-	"[2001:4860:4860::8844]:53",
-
 	"1.1.1.1:53",
 	"1.0.0.1:53",
 	"8.8.8.8:53",
 	"8.8.4.4:53",
+}
+
+// IPv6Resolvers trusted IPv6 resolvers
+var IPv6Resolvers = []string{
+	"[2606:4700:4700::1111]:53",
+	"[2606:4700:4700::1001]:53",
+	"[2001:4860:4860::8888]:53",
+	"[2001:4860:4860::8844]:53",
+}
+
+// checkIPv6Connectivity tests if IPv6 connectivity is available
+func checkIPv6Connectivity() bool {
+	// Test with a well-known IPv6 DNS server
+	testAddr := "[2001:4860:4860::8888]:53"
+	conn, err := net.DialTimeout("udp", testAddr, 3*time.Second)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
+// init checks for IPv6 connectivity and adds IPv6 resolvers if available
+func init() {
+	if checkIPv6Connectivity() {
+		DefaultResolvers = append(DefaultResolvers, IPv6Resolvers...)
+	}
 }
 
 // Client checks for CDN based IPs which should be excluded
