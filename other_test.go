@@ -57,7 +57,7 @@ func TestCheckDomainWithFallback(t *testing.T) {
 }
 
 func isIPv6Error(err error) bool {
-	return err != nil && stringsutil.ContainsAnyI(err.Error(), "no route to host")
+	return err != nil && stringsutil.ContainsAnyI(err.Error(), "no route to host", "network is unreachable")
 }
 
 func TestCheckDNSResponseIPv6(t *testing.T) {
