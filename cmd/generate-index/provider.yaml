@@ -11,14 +11,6 @@ cdn:
       - AS197068
       - AS200449
       - AS51115
-
-  cidr:
-    qrator:
-      - "66.110.32.128/30"
-      - "83.234.15.112/30"
-      - "87.245.197.192/30"
-      - "185.94.108.0/24"
-      - "185.104.208.0/22"
     arvancloud:
       - AS208006
       - AS205585
@@ -33,8 +25,8 @@ cdn:
       - https://api.fastly.com/public-ip-list
     google:
       - https://www.gstatic.com/ipranges/goog.json
-    stackpath:
-      - https://k3t9x2h3.map2.ssl.hwcdn.net/ipblocks.txt
+    # stackpath:
+    #  - https://k3t9x2h3.map2.ssl.hwcdn.net/ipblocks.txt
     gocache:
       - https://gocache.com.br/ips
     arvancloud:
@@ -42,6 +34,12 @@ cdn:
 
   # cidr contains the CIDR ranges for providers
   cidr:
+    qrator:
+      - "66.110.32.128/30"
+      - "83.234.15.112/30"
+      - "87.245.197.192/30"
+      - "185.94.108.0/24"
+      - "185.104.208.0/22"
     cafe24: # Korea
       - "14.128.128.0/17"
     cdnetworks: # Korea
