@@ -32,6 +32,21 @@ func TestCDNCheckValid(t *testing.T) {
 }
 
 
-func TestIPv6ConnCheckValid(t *testing.T) {
+func TestConnCheckValid(t *testing.T) {
+	require.True(
+		t,
+		checkConnectivity(DefaultResolvers, "udp"),
+		"DefaultResolvers is showing no connectivity",
+	)
 
+	require.False(
+		t,
+		checkConnectivity([]string{
+			"[::]:0",
+			"[::]:53",
+			"[::]:5",
+			"[::]:10",
+		}, "tcp"),
+		"invalid IPs showing as having connectivity",
+	)
 }

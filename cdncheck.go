@@ -31,19 +31,21 @@ var IPv6Resolvers = []string{
 	"[2001:4860:4860::8844]:53",
 }
 
-// checkIPv6Connectivity tests if IPv6 connectivity is available
-func checkIPv6Connectivity() bool {
-	// Test with a well-known IPv6 DNS server
+// checkConnectivity tests if connectivity is available
+//
+// - IPs: IPs and ports (e.g. "[2001:db8::1]:53")
+//
+// - proto: protocol to use (e.g. "udp", "tcp", etc)
+func checkConnectivity(IPs []string, proto string) bool {
 	var wg sync.WaitGroup
-	testResolvers := IPv6Resolvers
-	results := make(chan bool, len(testResolvers))
+	results := make(chan bool, len(IPs))
 
-	for _, resolver := range testResolvers {
+	for _, IP := range IPs {
 		wg.Add(1)
 		go func(){
 			defer wg.Done()
 
-			conn, err := net.DialTimeout("udp", resolver, 3*time.Second)
+			conn, err := net.DialTimeout(proto, IP, 3*time.Second)
 
 			results <- err == nil
 			if conn != nil {
@@ -62,7 +64,7 @@ func checkIPv6Connectivity() bool {
 
 // init checks for IPv6 connectivity and adds IPv6 resolvers if available
 func init() {
-	if checkIPv6Connectivity() {
+	if checkConnectivity(IPv6Resolvers, "udp") {
 		DefaultResolvers = append(DefaultResolvers, IPv6Resolvers...)
 	}
 }
