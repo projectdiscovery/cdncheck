@@ -34,13 +34,30 @@ var IPv6Resolvers = []string{
 // checkIPv6Connectivity tests if IPv6 connectivity is available
 func checkIPv6Connectivity() bool {
 	// Test with a well-known IPv6 DNS server
-	testAddr := "[2001:4860:4860::8888]:53"
-	conn, err := net.DialTimeout("udp", testAddr, 3*time.Second)
-	if err != nil {
-		return false
+	var wg sync.WaitGroup
+	testResolvers := IPv6Resolvers
+	results := make(chan bool, len(testResolvers))
+
+	for _, resolver := range testResolvers {
+		wg.Add(1)
+		go func(){
+			defer wg.Done()
+
+			conn, err := net.DialTimeout("udp", resolver, 3*time.Second)
+
+			results <- err == nil
+			if conn != nil {
+				conn.Close()
+			}
+		}()
 	}
-	conn.Close()
-	return true
+	wg.Wait()
+	close(results)
+
+	for re := range results {
+		if re == true { return true }
+	}
+	return false
 }
 
 // init checks for IPv6 connectivity and adds IPv6 resolvers if available
