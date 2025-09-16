@@ -31,7 +31,7 @@ var IPv6Resolvers = []string{
 	"[2001:4860:4860::8844]:53",
 }
 
-// checkConnectivity tests if connectivity is available
+// checkConnectivity tests if connectivity is available to any of the IPs you input
 //
 // - IPs: IPs and ports (e.g. "[2001:db8::1]:53")
 //
