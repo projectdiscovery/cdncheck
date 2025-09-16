@@ -30,3 +30,8 @@ func TestCDNCheckValid(t *testing.T) {
 	require.Nil(t, err, "Could not check ip in ranger")
 	require.False(t, found, "Localhost IP found in blacklist")
 }
+
+
+func TestIPv6ConnCheckValid(t *testing.T) {
+
+}
