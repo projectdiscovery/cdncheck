@@ -15,7 +15,6 @@ var (
 	DefaultCloudProviders string
 )
 
-// DefaultResolvers trusted
 var DefaultResolvers []string
 
 // IPv6Resolvers trusted IPv6 resolvers
