@@ -18,19 +18,20 @@ var (
 // DefaultResolvers trusted
 var DefaultResolvers []string
 
-var IPv4Resolvers = []string{
-	"1.1.1.1:53",
-	"1.0.0.1:53",
-	"8.8.8.8:53",
-	"8.8.4.4:53",
-}
-
 // IPv6Resolvers trusted IPv6 resolvers
 var IPv6Resolvers = []string{
 	"[2606:4700:4700::1111]:53",
 	"[2606:4700:4700::1001]:53",
 	"[2001:4860:4860::8888]:53",
 	"[2001:4860:4860::8844]:53",
+}
+
+// IPv4Resolvers trusted IPv4 resolvers
+var IPv4Resolvers = []string{
+	"1.1.1.1:53",
+	"1.0.0.1:53",
+	"8.8.8.8:53",
+	"8.8.4.4:53",
 }
 
 // checkConnectivity tests if connectivity is available to any of the IPs you input
