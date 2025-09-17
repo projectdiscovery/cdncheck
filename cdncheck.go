@@ -15,8 +15,10 @@ var (
 	DefaultCloudProviders string
 )
 
-// DefaultResolvers trusted (taken from fastdialer) - IPv4 only
-var DefaultResolvers = []string{
+// DefaultResolvers trusted
+var DefaultResolvers []string
+
+var IPv4Resolvers = []string{
 	"1.1.1.1:53",
 	"1.0.0.1:53",
 	"8.8.8.8:53",
@@ -62,10 +64,44 @@ func checkConnectivity(IPs []string, proto string) bool {
 	return false
 }
 
+func availableIpVersions() (hasV6 bool, hasV4 bool) {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func(){
+		if checkConnectivity(IPv6Resolvers, "udp") {
+			hasV6 = true
+		}
+	}()
+
+	wg.Add(1)
+	go func(){
+		if checkConnectivity(IPv4Resolvers, "udp") {
+			hasV4 = true
+		}
+	}()
+
+	wg.Wait()
+
+	return hasV6, hasV4
+}
+
+
 // init checks for IPv6 connectivity and adds IPv6 resolvers if available
 func init() {
-	if checkConnectivity(IPv6Resolvers, "udp") {
+	hasV6, hasV4 := availableIpVersions()
+
+	if hasV6 {
 		DefaultResolvers = append(DefaultResolvers, IPv6Resolvers...)
+	}
+
+	if hasV4 {
+		DefaultResolvers = append(DefaultResolvers, IPv4Resolvers...)
+	}
+
+	if len(DefaultResolvers) <= 0 {
+		DefaultResolvers = append(DefaultResolvers, IPv6Resolvers...)
+		DefaultResolvers = append(DefaultResolvers, IPv4Resolvers...)
 	}
 }
 
