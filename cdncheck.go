@@ -69,6 +69,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 
 	wg.Add(1)
 	go func(){
+		defer wg.Done()
 		if checkConnectivity(IPv6Resolvers, "udp") {
 			hasV6 = true
 		}
@@ -76,6 +77,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 
 	wg.Add(1)
 	go func(){
+		defer wg.Done()
 		if checkConnectivity(IPv4Resolvers, "udp") {
 			hasV4 = true
 		}
