@@ -87,7 +87,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 }
 
 
-// init checks for IPv6 connectivity and adds IPv6 resolvers if available
+// init checks for IPv6 and IPv4 connectivity and adds either group of resolvers if available, falls back to both if it can't detect any
 func init() {
 	hasV6, hasV4 := availableIpVersions()
 
