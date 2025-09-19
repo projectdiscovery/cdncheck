@@ -58,8 +58,8 @@ func checkConnectivity(IPs []string, proto string) bool {
 	wg.Wait()
 	close(results)
 
-	for re := range results {
-		if re == true { return true }
+	for result := range results {
+		if result == true { return true }
 	}
 	return false
 }
