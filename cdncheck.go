@@ -48,11 +48,11 @@ func checkConnectivity(IPs []string, proto string) bool {
 			defer wg.Done()
 
 			conn, err := net.DialTimeout(proto, IP, 3*time.Second)
+			if conn != nil {
+				defer conn.Close()
+			}
 
 			results <- err == nil
-			if conn != nil {
-				conn.Close()
-			}
 		}()
 	}
 	wg.Wait()
