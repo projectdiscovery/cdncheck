@@ -59,7 +59,7 @@ func checkConnectivity(IPs []string, proto string) bool {
 	close(results)
 
 	for result := range results {
-		if result == true { return true }
+		if result { return true }
 	}
 	return false
 }
