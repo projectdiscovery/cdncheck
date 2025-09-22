@@ -10,7 +10,7 @@ require (
 	github.com/miekg/dns v1.1.62
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.64
-	github.com/projectdiscovery/gologger v1.1.54
+	github.com/projectdiscovery/gologger v1.1.55
 	github.com/projectdiscovery/mapcidr v1.1.34
 	github.com/projectdiscovery/retryabledns v1.0.107
 	github.com/projectdiscovery/utils v0.5.0
