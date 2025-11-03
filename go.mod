@@ -4,14 +4,14 @@ go 1.24.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/gaissmai/bart v0.25.0
+	github.com/gaissmai/bart v0.26.0
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/miekg/dns v1.1.62
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.1.74
 	github.com/projectdiscovery/gologger v1.1.59
-	github.com/projectdiscovery/mapcidr v1.1.96
+	github.com/projectdiscovery/mapcidr v1.1.97
 	github.com/projectdiscovery/retryabledns v1.0.108
 	github.com/projectdiscovery/utils v0.6.0
 	github.com/stretchr/testify v1.11.1
