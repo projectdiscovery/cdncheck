@@ -7,10 +7,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func allHostportsWithPort(hostports []string, port string) (newIps []string) {
+func allHostportsWithPortForTest(hostports []string, port string) (newIps []string) {
 	for _, hostport := range hostports {
 		host, _, err := net.SplitHostPort(hostport)
-		if err != nil { continue }
+		if err != nil { panic(err) }
 		newIps = append(newIps, net.JoinHostPort(host, port))
 	}
 
@@ -51,7 +51,7 @@ func TestConnCheckValid(t *testing.T) {
 
 	require.True(
 		t,
-		checkDialConnectivity(allHostportsWithPort(DefaultResolvers, "10000"), "udp"),
+		checkDialConnectivity(allHostportsWithPortForTest(DefaultResolvers, "10000"), "udp"),
 		"DefaultResolvers using port 10000 is showing no net.Dial connectivity",
 	)
 
