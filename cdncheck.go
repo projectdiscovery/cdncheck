@@ -33,7 +33,7 @@ var IPv4Resolvers = []string{
 	"8.8.4.4:53",
 }
 
-// checkDialConnectivity tests if you can dial to any of the IPs you input
+// checkDialConnectivity tests if you can net.Dial to any of the IPs you input
 //
 // - IPs: IPs and ports (e.g. "[2001:db8::1]:53")
 //
