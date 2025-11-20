@@ -7,14 +7,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func allHostportsWithPortForTest(hostports []string, port string) (newIps []string) {
+func allHostportsWithPortForTest(
+	hostports []string,
+	port string,
+) (newHostports []string) {
 	for _, hostport := range hostports {
 		host, _, err := net.SplitHostPort(hostport)
 		if err != nil { panic(err) }
-		newIps = append(newIps, net.JoinHostPort(host, port))
+		newHostports = append(newHostports, net.JoinHostPort(host, port))
 	}
 
-	return newIps
+	return newHostports
 }
 
 func TestCDNCheckValid(t *testing.T) {
