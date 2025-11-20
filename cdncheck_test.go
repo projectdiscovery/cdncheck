@@ -7,6 +7,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func allHostportsWithPortForTest(
+	hostports []string,
+	port string,
+) (newHostports []string) {
+	for _, hostport := range hostports {
+		host, _, err := net.SplitHostPort(hostport)
+		if err != nil { panic(err) }
+		newHostports = append(newHostports, net.JoinHostPort(host, port))
+	}
+
+	return newHostports
+}
+
 func TestCDNCheckValid(t *testing.T) {
 	client := New()
 
@@ -29,4 +42,30 @@ func TestCDNCheckValid(t *testing.T) {
 	found, _, _, err = client.Check(net.ParseIP("127.0.0.1"))
 	require.Nil(t, err, "Could not check ip in ranger")
 	require.False(t, found, "Localhost IP found in blacklist")
+}
+
+
+func TestConnCheckValid(t *testing.T) {
+	require.True(
+		t,
+		checkDialConnectivity(DefaultResolvers, "udp"),
+		"DefaultResolvers is showing no connectivity",
+	)
+
+	require.True(
+		t,
+		checkDialConnectivity(allHostportsWithPortForTest(DefaultResolvers, "10000"), "udp"),
+		"DefaultResolvers using port 10000 is showing no net.Dial connectivity",
+	)
+
+	require.False(
+		t,
+		checkDialConnectivity([]string{
+			"[::]:0",
+			"[::]:53",
+			"[::]:5",
+			"[::]:10",
+		}, "tcp"),
+		"invalid IPs showing as having connectivity",
+	)
 }
