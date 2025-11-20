@@ -33,12 +33,12 @@ var IPv4Resolvers = []string{
 	"8.8.4.4:53",
 }
 
-// checkConnectivity tests if connectivity is available to any of the IPs you input
+// checkDialConnectivity tests if you can dial to any of the IPs you input
 //
 // - IPs: IPs and ports (e.g. "[2001:db8::1]:53")
 //
 // - proto: protocol to use (e.g. "udp", "tcp", etc)
-func checkConnectivity(IPs []string, proto string) bool {
+func checkDialConnectivity(IPs []string, proto string) bool {
 	var wg sync.WaitGroup
 	results := make(chan bool, len(IPs))
 
@@ -70,7 +70,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 	wg.Add(1)
 	go func(){
 		defer wg.Done()
-		if checkConnectivity([]string{"[2001:4860:4860::8888]:53"}, "udp") {
+		if checkDialConnectivity([]string{"[2001:4860:4860::8888]:53"}, "udp") {
 			hasV6 = true
 		}
 	}()
@@ -78,7 +78,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 	wg.Add(1)
 	go func(){
 		defer wg.Done()
-		if checkConnectivity([]string{"8.8.8.8:53"}, "udp") {
+		if checkDialConnectivity([]string{"8.8.8.8:53"}, "udp") {
 			hasV4 = true
 		}
 	}()
