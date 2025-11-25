@@ -15,13 +15,7 @@ var (
 	DefaultCloudProviders string
 )
 
-// DefaultResolvers trusted (taken from fastdialer) - IPv4 only
-var DefaultResolvers = []string{
-	"1.1.1.1:53",
-	"1.0.0.1:53",
-	"8.8.8.8:53",
-	"8.8.4.4:53",
-}
+var DefaultResolvers []string
 
 // IPv6Resolvers trusted IPv6 resolvers
 var IPv6Resolvers = []string{
@@ -31,22 +25,85 @@ var IPv6Resolvers = []string{
 	"[2001:4860:4860::8844]:53",
 }
 
-// checkIPv6Connectivity tests if IPv6 connectivity is available
-func checkIPv6Connectivity() bool {
-	// Test with a well-known IPv6 DNS server
-	testAddr := "[2001:4860:4860::8888]:53"
-	conn, err := net.DialTimeout("udp", testAddr, 3*time.Second)
-	if err != nil {
-		return false
-	}
-	conn.Close()
-	return true
+// IPv4Resolvers trusted IPv4 resolvers
+var IPv4Resolvers = []string{
+	"1.1.1.1:53",
+	"1.0.0.1:53",
+	"8.8.8.8:53",
+	"8.8.4.4:53",
 }
 
-// init checks for IPv6 connectivity and adds IPv6 resolvers if available
+// checkDialConnectivity tests if you can net.Dial to any of the IPs you input
+//
+// - IPs: IPs and ports (e.g. "[2001:db8::1]:53")
+//
+// - proto: protocol to use (e.g. "udp", "tcp", etc)
+func checkDialConnectivity(IPs []string, proto string) bool {
+	var wg sync.WaitGroup
+	results := make(chan bool, len(IPs))
+
+	for _, IP := range IPs {
+		wg.Add(1)
+		go func(){
+			defer wg.Done()
+
+			conn, err := net.DialTimeout(proto, IP, 3*time.Second)
+			if conn != nil {
+				defer conn.Close()
+			}
+
+			results <- err == nil
+		}()
+	}
+	wg.Wait()
+	close(results)
+
+	for result := range results {
+		if result { return true }
+	}
+	return false
+}
+
+func availableIpVersions() (hasV6 bool, hasV4 bool) {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func(){
+		defer wg.Done()
+		if checkDialConnectivity([]string{"[2001:4860:4860::8888]:10000"}, "udp") {
+			hasV6 = true
+		}
+	}()
+
+	wg.Add(1)
+	go func(){
+		defer wg.Done()
+		if checkDialConnectivity([]string{"8.8.8.8:10000"}, "udp") {
+			hasV4 = true
+		}
+	}()
+
+	wg.Wait()
+
+	return hasV6, hasV4
+}
+
+
+// init checks for IPv6 and IPv4 connectivity and adds either group of resolvers if available, falls back to both if it can't detect any
 func init() {
-	if checkIPv6Connectivity() {
+	hasV6, hasV4 := availableIpVersions()
+
+	if hasV6 {
 		DefaultResolvers = append(DefaultResolvers, IPv6Resolvers...)
+	}
+
+	if hasV4 {
+		DefaultResolvers = append(DefaultResolvers, IPv4Resolvers...)
+	}
+
+	if len(DefaultResolvers) <= 0 {
+		DefaultResolvers = append(DefaultResolvers, IPv6Resolvers...)
+		DefaultResolvers = append(DefaultResolvers, IPv4Resolvers...)
 	}
 }
 
