@@ -4,17 +4,17 @@ go 1.24.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/gaissmai/bart v0.23.1
+	github.com/gaissmai/bart v0.26.0
 	github.com/ipinfo/go/v2 v2.9.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/miekg/dns v1.1.62
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/goflags v0.1.64
-	github.com/projectdiscovery/gologger v1.1.54
-	github.com/projectdiscovery/mapcidr v1.1.34
-	github.com/projectdiscovery/retryabledns v1.0.107
-	github.com/projectdiscovery/utils v0.5.0
-	github.com/stretchr/testify v1.10.0
+	github.com/projectdiscovery/goflags v0.1.74
+	github.com/projectdiscovery/gologger v1.1.61
+	github.com/projectdiscovery/mapcidr v1.1.97
+	github.com/projectdiscovery/retryabledns v1.0.109
+	github.com/projectdiscovery/utils v0.7.1
+	github.com/stretchr/testify v1.11.1
 	github.com/weppos/publicsuffix-go v0.40.3-0.20250408071509-6074bbe7fd39
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -66,7 +66,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.3-0.20240618155329-98d742f6907a // indirect
-	github.com/nwaples/rardecode/v2 v2.0.0-beta.4.0.20241112120701-034e449c6e78 // indirect
+	github.com/nwaples/rardecode/v2 v2.2.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -91,15 +91,15 @@ require (
 	github.com/zcalusic/sysinfo v1.0.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
-	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.39.0 // indirect
+	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/term v0.31.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/term v0.37.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
 )
