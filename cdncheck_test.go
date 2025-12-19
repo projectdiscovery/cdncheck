@@ -52,11 +52,18 @@ func TestConnCheckValid(t *testing.T) {
 		"DefaultResolvers is showing no connectivity",
 	)
 
+
+	def10000 := allHostportsWithPortForTest(
+		DefaultResolvers,
+		"10000",
+	)
+
 	require.True(
 		t,
-		checkDialConnectivity(allHostportsWithPortForTest(DefaultResolvers, "10000"), "udp"),
+		checkDialConnectivity(def10000, "udp"),
 		"DefaultResolvers using port 10000 is showing no net.Dial connectivity",
 	)
+
 
 	require.False(
 		t,

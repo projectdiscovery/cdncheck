@@ -44,7 +44,7 @@ func checkDialConnectivity(IPs []string, proto string) bool {
 
 	for _, IP := range IPs {
 		wg.Add(1)
-		go func(){
+		go func(IP string){
 			defer wg.Done()
 
 			conn, err := net.DialTimeout(proto, IP, 3*time.Second)
@@ -53,7 +53,7 @@ func checkDialConnectivity(IPs []string, proto string) bool {
 			}
 
 			results <- err == nil
-		}()
+		}(IP)
 	}
 	wg.Wait()
 	close(results)
