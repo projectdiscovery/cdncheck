@@ -70,7 +70,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 	wg.Add(1)
 	go func(){
 		defer wg.Done()
-		if checkDialConnectivity([]string{"[2001:4860:4860::8888]:10000"}, "udp") {
+		if checkDialConnectivity([]string{"[2001:4860:4860::8888]:53"}, "udp") {
 			hasV6 = true
 		}
 	}()
@@ -78,7 +78,7 @@ func availableIpVersions() (hasV6 bool, hasV4 bool) {
 	wg.Add(1)
 	go func(){
 		defer wg.Done()
-		if checkDialConnectivity([]string{"8.8.8.8:10000"}, "udp") {
+		if checkDialConnectivity([]string{"8.8.8.8:53"}, "udp") {
 			hasV4 = true
 		}
 	}()
