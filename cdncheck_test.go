@@ -30,3 +30,24 @@ func TestCDNCheckValid(t *testing.T) {
 	require.Nil(t, err, "Could not check ip in ranger")
 	require.False(t, found, "Localhost IP found in blacklist")
 }
+
+
+func TestConnCheckValid(t *testing.T) {
+	require.True(
+		t,
+		checkDialConnectivity(DefaultResolvers, "udp"),
+		"DefaultResolvers is showing no connectivity",
+	)
+
+
+	require.False(
+		t,
+		checkDialConnectivity([]string{
+			"[::]:0",
+			"[::]:53",
+			"[::]:5",
+			"[::]:10",
+		}, "tcp"),
+		"invalid IPs showing as having connectivity",
+	)
+}
