@@ -13,7 +13,7 @@ require (
 	github.com/projectdiscovery/gologger v1.1.68
 	github.com/projectdiscovery/mapcidr v1.1.97
 	github.com/projectdiscovery/retryabledns v1.0.113
-	github.com/projectdiscovery/utils v0.9.0
+	github.com/projectdiscovery/utils v0.10.0
 	github.com/stretchr/testify v1.11.1
 	github.com/weppos/publicsuffix-go v0.50.3-0.20260104170930-90713dec78f2
 	gopkg.in/yaml.v3 v3.0.1
