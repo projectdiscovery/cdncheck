@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Setup golang
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: 1.24.x
 
@@ -24,6 +24,12 @@ jobs:
           IPINFO_TOKEN: "${{ secrets.IPINFO_TOKEN }}"
         run: go run . -output ../../sources_data.json
         working-directory: cmd/generate-index
+
+      - name: Validate generated sources_data.json
+        run: |
+          # Fail fast if any top-level category dropped to zero providers, which
+          # would indicate a silent regression from an upstream/data fetch issue.
+          jq -e '(.cdn|length) > 0 and (.waf|length) > 0 and (.cloud|length) > 0 and (.common|length) > 0' sources_data.json > /dev/null
 
       - name: Create local changes
         run: |
