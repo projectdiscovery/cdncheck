@@ -114,22 +114,22 @@ func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {
 		return
 	}
 	var builder strings.Builder
-	builder.WriteString(fmt.Sprintf("Found result: %v", (cdnCount + cloudCount + wafCount)))
+	_, _ = fmt.Fprintf(&builder, "Found result: %v", (cdnCount + cloudCount + wafCount))
 	builder.WriteString(" (")
 	if cdnCount > 0 {
-		builder.WriteString(fmt.Sprintf("%s %v", sw.BrightBlue("CDN:").String(), cdnCount))
+		_, _ = fmt.Fprintf(&builder, "%s %v", sw.BrightBlue("CDN:").String(), cdnCount)
 	}
 	if cloudCount > 0 {
 		if cdnCount > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString(fmt.Sprintf("%s %v", sw.BrightGreen("CLOUD:").String(), cloudCount))
+		_, _ = fmt.Fprintf(&builder, "%s %v", sw.BrightGreen("CLOUD:").String(), cloudCount)
 	}
 	if wafCount > 0 {
 		if cdnCount > 0 || cloudCount > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString(fmt.Sprintf("%s %v", sw.Yellow("WAF:").String(), wafCount))
+		_, _ = fmt.Fprintf(&builder, "%s %v", sw.Yellow("WAF:").String(), wafCount)
 	}
 	builder.WriteString(")")
 	gologger.Info().Msg(builder.String())
