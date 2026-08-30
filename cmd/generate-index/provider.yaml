@@ -14,7 +14,8 @@ cdn:
     arvancloud:
       - AS208006
       - AS205585
-
+    huawei:
+      - AS149640
   # urls contains a list of URLs for CDN providers
   urls:
     gcore:
@@ -32,7 +33,8 @@ cdn:
     arvancloud:
       - https://www.arvancloud.ir/fa/ips.txt
 
-  # cidr contains the CIDR ranges for providers
+ 
+# cidr contains the CIDR ranges for providers
   cidr:
     qrator:
       - "66.110.32.128/30"
@@ -133,6 +135,10 @@ cdn:
       - "203.235.224.0/19"
       - "203.242.64.0/19"
       - "203.242.120.0/21"
+    huawei: # China
+      - "49.229.94.0/24"
+      - "58.64.0.0/24"
+      - "58.64.11.0/24"
     百度云加速:
       - "101.227.206.0/24"
       - "101.227.207.0/24"
