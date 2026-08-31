@@ -18,6 +18,7 @@ var (
 	input  = flag.String("input", "provider.yaml", "provider file for processing")
 	output = flag.String("output", "sources_data.json", "output file for generated sources")
 	token  = flag.String("token", "", "Token for the ipinfo service")
+	strict = flag.Bool("strict", true, "exit non-zero if any provider source failed (set to false to keep legacy lenient behaviour)")
 )
 
 func main() {
@@ -40,9 +41,9 @@ func process() error {
 		return err
 	}
 
-	compiled, err := categories.Compile(options)
-	if err != nil {
-		return err
+	compiled, compileErr := categories.Compile(options)
+	if compileErr != nil {
+		log.Printf("[warn] one or more provider sources failed: %s", compileErr)
 	}
 
 	outputFile, err := os.Create(*output)
@@ -87,6 +88,9 @@ func process() error {
 	_, err = outputFile.Write(jsonData)
 	if err != nil {
 		return errors.Wrap(err, "could not write to output file")
+	}
+	if *strict && compileErr != nil {
+		return errors.Wrap(compileErr, "provider source failures (use -strict=false to ignore)")
 	}
 	return nil
 }
