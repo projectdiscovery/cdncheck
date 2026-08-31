@@ -29,4 +29,10 @@ func TestCDNCheckValid(t *testing.T) {
 	found, _, _, err = client.Check(net.ParseIP("127.0.0.1"))
 	require.Nil(t, err, "Could not check ip in ranger")
 	require.False(t, found, "Localhost IP found in blacklist")
+
+	found, provider, itemType, err = client.Check(net.ParseIP("49.229.94.1"))
+	require.Nil(t, err, "Could not check ip in ranger")
+	require.True(t, found, "could not match huawei cdn cidr")
+	require.Equal(t, "huawei", provider, "could not get correct provider")
+	require.Equal(t, "cdn", itemType, "could not get correct item type")
 }

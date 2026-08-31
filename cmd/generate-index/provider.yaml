@@ -33,8 +33,7 @@ cdn:
     arvancloud:
       - https://www.arvancloud.ir/fa/ips.txt
 
- 
-# cidr contains the CIDR ranges for providers
+  # cidr contains the CIDR ranges for providers
   cidr:
     qrator:
       - "66.110.32.128/30"
@@ -135,7 +134,7 @@ cdn:
       - "203.235.224.0/19"
       - "203.242.64.0/19"
       - "203.242.120.0/21"
-    huawei: # China
+    huawei: # Thailand (AS149640)
       - "49.229.94.0/24"
       - "58.64.0.0/24"
       - "58.64.11.0/24"
