@@ -9,7 +9,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/miekg/dns v1.1.72
 	github.com/pkg/errors v0.9.1
-	github.com/projectdiscovery/goflags v0.1.76
+	github.com/projectdiscovery/goflags v0.2.1
 	github.com/projectdiscovery/gologger v1.1.72
 	github.com/projectdiscovery/mapcidr v1.1.97
 	github.com/projectdiscovery/retryabledns v1.0.115
