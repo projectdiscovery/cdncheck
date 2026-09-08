@@ -8,35 +8,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  bump-version:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      commit_count: ${{ steps.get_commit.outputs.COMMIT_COUNT }}
+      new_tag: ${{ steps.next_version.outputs.new_tag }}
+      new_version: ${{ steps.next_version.outputs.new_version }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Get Commit Count
+        id: get_commit
+        run: git rev-list "$(git rev-list --tags --no-walk --max-count=1)"..HEAD --count | xargs -I {} echo COMMIT_COUNT={} >> "$GITHUB_OUTPUT"
+
+      - name: Resolve next version
+        if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0 }}
+        id: next_version
+        uses: mathieudutour/github-tag-action@v6.1
         with:
-          go-version: 1.25.x
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dry_run: true
+
+  tag-release:
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: ${{ needs.prepare.outputs.commit_count > 0 }}
+    env:
+      NEW_TAG: ${{ needs.prepare.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
 
       - name: Bump version in banner.go
         working-directory: internal/runner
         run: |
-          curl -LO https://raw.githubusercontent.com/projectdiscovery/utils/main/scripts/versionbump/versionbump.go
-          go run versionbump.go -file banner.go -var version -part patch
-
-      - name: Create local changes
-        working-directory: internal/runner
-        run: |
-          git add banner.go
+          grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$' <<< "${NEW_TAG}" || { echo "::error::bad version '${NEW_TAG}'"; exit 1; }
+          sed -i -E "s|^const version = \`.*\`\$|const version = \`${NEW_TAG}\`|" banner.go
+          grep -qF "const version = \`${NEW_TAG}\`" banner.go
 
       - name: Commit files
-        working-directory: internal/runner
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -am "Bump version"
+          git diff --quiet -- internal/runner/banner.go || git commit -m "Bump version" -- internal/runner/banner.go
 
       - name: Push changes
         uses: ad-m/github-push-action@master
@@ -44,38 +62,24 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
-  tag-release:
-    runs-on: ubuntu-latest
-    needs: bump-version
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-
-      - name: Pull latest changes
-        run: git pull origin ${{ github.ref }}
-
       - name: Get latest version bump commit
         id: get_latest_commit
-        run: |
-          git pull origin ${{ github.ref }}
-          echo "LATEST_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Get Commit Count
-        id: get_commit
-        run: git rev-list "$(git rev-list --tags --no-walk --max-count=1)"..HEAD --count | xargs -I {} echo COMMIT_COUNT={} >> "$GITHUB_OUTPUT"
+        run: echo "LATEST_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Create release and tag
-        if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0  }}
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.PDTEAMX_PAT }}
+          custom_tag: ${{ needs.prepare.outputs.new_version }}
           commit_sha: ${{ steps.get_latest_commit.outputs.LATEST_COMMIT }}
 
+      - name: Verify tag points at the bumped commit
+        run: |
+          git fetch origin --tags --force
+          [ "$(git rev-list -n 1 "${NEW_TAG}")" = "${{ steps.get_latest_commit.outputs.LATEST_COMMIT }}" ] || { echo "::error::${NEW_TAG} does not point at the bumped commit"; exit 1; }
+
       - name: Create a GitHub release
-        if: ${{ steps.get_commit.outputs.COMMIT_COUNT > 0  }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PDTEAMX_PAT }}
