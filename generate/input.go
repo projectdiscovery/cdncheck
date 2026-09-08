@@ -33,7 +33,11 @@ func getValidateCidrs(cidrs []string) []string {
 	return output
 }
 
-// Compile returns the compiled form of an input structure
+// Compile returns the compiled form of an input structure.
+//
+// Per-provider/per-source failures are accumulated and returned as a joined
+// error. The compiled result is still returned alongside the error so callers
+// can decide whether to use a partially populated dataset.
 func (c *Categories) Compile(options *Options) (*cdncheck.InputCompiled, error) {
 	compiled := &cdncheck.InputCompiled{
 		CDN:    make(map[string][]string),
@@ -41,20 +45,23 @@ func (c *Categories) Compile(options *Options) (*cdncheck.InputCompiled, error) 
 		Cloud:  make(map[string][]string),
 		Common: make(map[string][]string),
 	}
-	// Fetch input items specified
+	var errs []error
 	if c.CDN != nil {
 		if err := c.CDN.fetchInputItem(options, compiled.CDN); err != nil {
-			log.Printf("[err] could not fetch cdn item: %s\n", err)
+			log.Printf("[err] cdn: %s\n", err)
+			errs = append(errs, fmt.Errorf("cdn: %w", err))
 		}
 	}
 	if c.WAF != nil {
 		if err := c.WAF.fetchInputItem(options, compiled.WAF); err != nil {
-			log.Printf("[err] could not fetch waf item: %s\n", err)
+			log.Printf("[err] waf: %s\n", err)
+			errs = append(errs, fmt.Errorf("waf: %w", err))
 		}
 	}
 	if c.Cloud != nil {
 		if err := c.Cloud.fetchInputItem(options, compiled.Cloud); err != nil {
-			log.Printf("[err] could not fetch cloud item: %s\n", err)
+			log.Printf("[err] cloud: %s\n", err)
+			errs = append(errs, fmt.Errorf("cloud: %w", err))
 		}
 	}
 	if c.Common != nil {
@@ -77,43 +84,53 @@ func (c *Categories) Compile(options *Options) (*cdncheck.InputCompiled, error) 
 		}
 		for _, item := range scraper {
 			if response, err := item.scraper(http.DefaultClient); err != nil {
-				log.Printf("[err] could not scrape %s item: %s\n", item.name, err)
+				log.Printf("[err] scraper %s/%s: %s\n", dataType, item.name, err)
+				errs = append(errs, fmt.Errorf("scraper %s/%s: %w", dataType, item.name, err))
 			} else {
-				data[item.name] = response
+				data[item.name] = appendUniqueCIDRs(data[item.name], response)
 			}
 		}
 	}
-	return compiled, nil
+	return compiled, errors.Join(errs...)
 }
 
-// fetchInputItem fetches input items and writes data to map
+// fetchInputItem fetches input items and writes data to map.
+//
+// On per-item failure the loop continues so a single unreachable URL or ASN
+// does not drop the rest of the providers in this category. All errors are
+// joined and returned at the end. Multiple URLs/ASNs declared for the same
+// provider are merged (deduped) instead of overwritten.
 func (c *Category) fetchInputItem(options *Options, data map[string][]string) error {
+	var errs []error
 	for provider, cidrs := range c.CIDR {
-		data[provider] = cidrs
+		data[provider] = appendUniqueCIDRs(data[provider], cidrs)
 	}
 	for provider, urls := range c.URLs {
 		for _, item := range urls {
-			if cidrs, err := getCIDRFromURL(item); err != nil {
-				return fmt.Errorf("could not get url %s: %s", item, err)
-			} else {
-				data[provider] = cidrs
+			cidrs, err := getCIDRFromURL(item)
+			if err != nil {
+				log.Printf("[err] url %s (%s): %s\n", provider, item, err)
+				errs = append(errs, fmt.Errorf("url %s (%s): %w", provider, item, err))
+				continue
 			}
+			data[provider] = appendUniqueCIDRs(data[provider], cidrs)
 		}
 	}
-	// Only scrape ASN if we have an ID
 	if !options.HasAuthInfo() {
-		return nil
+		return errors.Join(errs...)
 	}
 	for provider, asn := range c.ASN {
 		for _, item := range asn {
-			if cidrs, err := getIpInfoASN(http.DefaultClient, options.IPInfoToken, item); err != nil {
-				return fmt.Errorf("could not get asn %s: %s", item, err)
-			} else {
-				data[provider] = cidrs
+			cidrs, err := getIpInfoASN(http.DefaultClient, options.IPInfoToken, item)
+			if err != nil {
+				log.Printf("[err] asn %s (%s): %s\n", provider, item, err)
+				errs = append(errs, fmt.Errorf("asn %s (%s): %w", provider, item, err))
+				continue
 			}
+			data[provider] = appendUniqueCIDRs(data[provider], cidrs)
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 var errNoCidrFound = errors.New("no cidrs found for url")
@@ -133,6 +150,9 @@ func getIpInfoASN(httpClient *http.Client, token string, asn string) ([]string, 
 	}
 	var cidrs []string
 	for _, prefix := range info.Prefixes {
+		cidrs = append(cidrs, prefix.Netblock)
+	}
+	for _, prefix := range info.Prefixes6 {
 		cidrs = append(cidrs, prefix.Netblock)
 	}
 	if len(cidrs) == 0 {
