@@ -1,4 +1,4 @@
-FROM alpine:3.18.2
+FROM alpine:latest
 
 LABEL org.opencontainers.image.authors="ProjectDiscovery"
 LABEL org.opencontainers.image.description="cdncheck is a tool for identifying the technology associated with dns / ip network addresses."
