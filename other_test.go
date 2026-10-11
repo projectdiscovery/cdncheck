@@ -36,6 +36,16 @@ func TestCheckWappalyzer(t *testing.T) {
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "imperva", provider, "could not get correct provider")
 
+	valid, provider, err = client.CheckWappalyzer(map[string]struct{}{"fastly": {}})
+	require.Nil(t, err, "could not check wappalyzer")
+	require.True(t, valid, "could not get valid cname")
+	require.Equal(t, "fastly", provider, "could not get correct provider")
+
+	valid, provider, err = client.CheckWappalyzer(map[string]struct{}{"sucuri": {}})
+	require.Nil(t, err, "could not check wappalyzer")
+	require.True(t, valid, "could not get valid cname")
+	require.Equal(t, "sucuri", provider, "could not get correct provider")
+
 	valid, _, err = client.CheckWappalyzer(map[string]struct{}{"php": {}})
 	require.Nil(t, err, "could not check cname")
 	require.False(t, valid, "could get valid cname")

@@ -45,7 +45,11 @@ func (r *Runner) Run() error {
 		return errors.Wrap(err, "could not configure output")
 	}
 	defer r.writer.Close()
-	output := make(chan Output, 1)
+	threads := r.options.Threads
+	if threads <= 0 {
+		threads = 1
+	}
+	output := make(chan Output, threads)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go r.process(output, wg)
@@ -68,18 +72,57 @@ func (r *Runner) SetWriter(writer io.Writer) error {
 func (r *Runner) process(output chan Output, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer close(output)
+
+	threads := r.options.Threads
+	if threads <= 0 {
+		threads = 1
+	}
+
+	tasks := make(chan string, threads)
+	var workerWg sync.WaitGroup
+
+	for i := 0; i < threads; i++ {
+		workerWg.Add(1)
+		go func() {
+			defer workerWg.Done()
+			for item := range tasks {
+				r.processInputItemSingle(item, output)
+			}
+		}()
+	}
+
+	sendItem := func(input string) {
+		if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
+			cidrInputs, err := mapcidr.IPAddressesAsStream(input)
+			if err != nil {
+				if r.options.Verbose {
+					gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
+				}
+				return
+			}
+			for cidr := range cidrInputs {
+				tasks <- cidr
+			}
+		} else {
+			tasks <- input
+		}
+	}
+
 	for _, target := range r.options.Inputs {
-		r.processInputItem(target, output)
+		sendItem(target)
 	}
 	if r.options.HasStdin {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			text := scanner.Text()
 			if text != "" {
-				r.processInputItem(text, output)
+				sendItem(text)
 			}
 		}
 	}
+
+	close(tasks)
+	workerWg.Wait()
 }
 
 func (r *Runner) waitForData(output chan Output, wg *sync.WaitGroup) {

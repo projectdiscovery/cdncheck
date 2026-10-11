@@ -11,11 +11,32 @@ var suffixToSource map[string]string
 
 // cdnWappalyzerTechnologies contains a map of wappalyzer technologies to cdns
 var cdnWappalyzerTechnologies = map[string]string{
-	"imperva":    "imperva",
-	"incapsula":  "incapsula",
-	"cloudflare": "cloudflare",
-	"cloudfront": "amazon",
-	"akamai":     "akamai",
+	"imperva":       "imperva",
+	"incapsula":     "incapsula",
+	"cloudflare":    "cloudflare",
+	"cloudfront":    "amazon",
+	"akamai":        "akamai",
+	"fastly":        "fastly",
+	"sucuri":        "sucuri",
+	"reblaze":       "reblaze",
+	"stackpath":     "stackpath",
+	"bunny":         "bunny",
+	"bunnycdn":      "bunny",
+	"cdn77":         "cdn77",
+	"keycdn":        "keycdn",
+	"vercel":        "vercel",
+	"netlify":       "netlify",
+	"azure cdn":     "azure",
+	"azure":         "azure",
+	"alibaba cloud": "alibaba",
+	"google cloud":  "google",
+	"cachefly":      "cachefly",
+	"edgecast":      "edgecast",
+	"limelight":     "limelight",
+	"ddos-guard":    "ddos-guard",
+	"arvancloud":    "arvancloud",
+	"qrator":        "qrator",
+	"section.io":    "section.io",
 }
 
 // CheckFQDN checks if fqdns are known cloud ones
