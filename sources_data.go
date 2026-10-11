@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 //go:embed sources_data.json
@@ -17,5 +18,11 @@ func init() {
 	}
 	DefaultCDNProviders = mapKeys(generatedData.CDN)
 	DefaultWafProviders = mapKeys(generatedData.WAF)
+	if !strings.Contains(DefaultWafProviders, "citrix-netscaler") {
+		if DefaultWafProviders != "" {
+			DefaultWafProviders += ", "
+		}
+		DefaultWafProviders += "citrix-netscaler"
+	}
 	DefaultCloudProviders = mapKeys(generatedData.Cloud)
 }
