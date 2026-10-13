@@ -202,26 +202,6 @@ func (r *Runner) configureOutput() error {
 	return nil
 }
 
-// processInputItem processes a single input item
-func (r *Runner) processInputItem(input string, output chan Output) {
-	// CIDR input
-	if _, ipRange, _ := net.ParseCIDR(input); ipRange != nil {
-		cidrInputs, err := mapcidr.IPAddressesAsStream(input)
-		if err != nil {
-			if r.options.Verbose {
-				gologger.Error().Msgf("Could not parse cidr %s: %s", input, err)
-			}
-			return
-		}
-		for cidr := range cidrInputs {
-			r.processInputItemSingle(cidr, output)
-		}
-	} else {
-		// Normal input
-		r.processInputItemSingle(input, output)
-	}
-}
-
 func (r *Runner) processInputItemSingle(item string, output chan Output) {
 	data := Output{
 		aurora: r.aurora,
