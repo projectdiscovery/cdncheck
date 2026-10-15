@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestCDNCheckValid tests that IP addresses and domain suffixes match their expected CDN/WAF providers.
 func TestCDNCheckValid(t *testing.T) {
 	client := New()
 
