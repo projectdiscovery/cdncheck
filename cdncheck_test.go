@@ -35,6 +35,41 @@ func TestCDNCheckValid(t *testing.T) {
 	require.True(t, found, "could not match huawei cdn cidr")
 	require.Equal(t, "huawei", provider, "could not get correct provider")
 	require.Equal(t, "cdn", itemType, "could not get correct item type")
+
+	// Aliyun CDN
+	found, provider, itemType, err = client.Check(net.ParseIP("1.25.68.1"))
+	require.Nil(t, err)
+	require.True(t, found, "could not match aliyun cdn cidr")
+	require.Equal(t, "阿里云", provider)
+	require.Equal(t, "cdn", itemType)
+
+	// Wangsu CDN
+	found, provider, itemType, err = client.Check(net.ParseIP("1.71.150.1"))
+	require.Nil(t, err)
+	require.True(t, found, "could not match wangsu cdn cidr")
+	require.Equal(t, "网宿", provider)
+	require.Equal(t, "cdn", itemType)
+
+	// Tencent Cloud CDN
+	found, provider, itemType, err = client.Check(net.ParseIP("1.56.98.1"))
+	require.Nil(t, err)
+	require.True(t, found, "could not match tencent cdn cidr")
+	require.Equal(t, "腾讯云", provider)
+	require.Equal(t, "cdn", itemType)
+
+	// Baidu Cloud CDN
+	found, provider, itemType, err = client.Check(net.ParseIP("1.56.80.1"))
+	require.Nil(t, err)
+	require.True(t, found, "could not match baidu cdn cidr")
+	require.Equal(t, "百度云加速", provider)
+	require.Equal(t, "cdn", itemType)
+
+	// Baidu Domain Suffix
+	found, provider, itemType, err = client.CheckSuffix("www.a.shifen.com")
+	require.Nil(t, err)
+	require.True(t, found, "could not match baidu shifen domain suffix")
+	require.Equal(t, "百度智能云 CDN", provider)
+	require.Equal(t, "waf", itemType)
 }
 
 func TestCheckGoogleCloudCustomerIPIsCloud(t *testing.T) {
