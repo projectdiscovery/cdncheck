@@ -91,6 +91,10 @@ func (c *Categories) Compile(options *Options) (*cdncheck.InputCompiled, error) 
 			}
 		}
 	}
+	if err := excludeGoogleCloudFromCDN(compiled); err != nil {
+		log.Printf("[err] exclude google cloud from cdn: %s\n", err)
+		errs = append(errs, fmt.Errorf("exclude google cloud from cdn: %w", err))
+	}
 	return compiled, errors.Join(errs...)
 }
 

@@ -36,3 +36,21 @@ func TestCDNCheckValid(t *testing.T) {
 	require.Equal(t, "huawei", provider, "could not get correct provider")
 	require.Equal(t, "cdn", itemType, "could not get correct item type")
 }
+
+func TestCheckGoogleCloudCustomerIPIsCloud(t *testing.T) {
+	client := New()
+
+	// A Compute Engine VM in a cloud.json range: Google Cloud, not the google CDN.
+	found, provider, itemType, err := client.Check(net.ParseIP("34.67.190.20"))
+	require.Nil(t, err, "Could not check ip in ranger")
+	require.True(t, found, "could not match google cloud cidr")
+	require.Equal(t, "google", provider, "could not get correct provider")
+	require.Equal(t, "cloud", itemType, "a google cloud customer ip must not match as cdn")
+
+	// A Google front end outside cloud.json stays in the google CDN.
+	found, provider, itemType, err = client.Check(net.ParseIP("142.250.80.46"))
+	require.Nil(t, err, "Could not check ip in ranger")
+	require.True(t, found, "could not match google cdn cidr")
+	require.Equal(t, "google", provider, "could not get correct provider")
+	require.Equal(t, "cdn", itemType, "could not get correct item type")
+}
