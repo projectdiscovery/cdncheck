@@ -2,6 +2,8 @@ module github.com/projectdiscovery/cdncheck
 
 go 1.25.0
 
+toolchain go1.26.10
+
 require (
 	github.com/PuerkitoBio/goquery v1.13.0
 	github.com/gaissmai/bart v0.29.0
