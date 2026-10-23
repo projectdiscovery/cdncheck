@@ -4,18 +4,18 @@ go 1.26.10
 
 require (
 	github.com/PuerkitoBio/goquery v1.13.0
-	github.com/gaissmai/bart v0.29.0
+	github.com/gaissmai/bart v0.30.0
 	github.com/ipinfo/go/v2 v2.14.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/miekg/dns v1.1.73
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.2.1
-	github.com/projectdiscovery/gologger v1.1.72
+	github.com/projectdiscovery/gologger v1.1.73
 	github.com/projectdiscovery/mapcidr v1.1.97
 	github.com/projectdiscovery/retryabledns v1.0.116
-	github.com/projectdiscovery/utils v0.11.3
+	github.com/projectdiscovery/utils v0.11.10
 	github.com/stretchr/testify v1.12.1
-	github.com/weppos/publicsuffix-go v0.50.3
+	github.com/weppos/publicsuffix-go v0.50.4-0.20260821095816-b0fdb5c2d345
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -38,8 +38,8 @@ require (
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/google/go-github/v30 v30.1.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-github/v92 v92.0.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
