@@ -11,11 +11,15 @@ var suffixToSource map[string]string
 
 // cdnWappalyzerTechnologies contains a map of wappalyzer technologies to cdns
 var cdnWappalyzerTechnologies = map[string]string{
-	"imperva":    "imperva",
-	"incapsula":  "incapsula",
-	"cloudflare": "cloudflare",
-	"cloudfront": "amazon",
-	"akamai":     "akamai",
+	"imperva":          "imperva",
+	"incapsula":        "incapsula",
+	"cloudflare":       "cloudflare",
+	"cloudfront":       "amazon",
+	"akamai":           "akamai",
+	"citrix netscaler": "citrix-netscaler",
+	"citrix adc":       "citrix-netscaler",
+	"citrix":           "citrix-netscaler",
+	"netscaler":        "citrix-netscaler",
 }
 
 // CheckFQDN checks if fqdns are known cloud ones

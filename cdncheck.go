@@ -58,6 +58,7 @@ type Client struct {
 	waf          *providerScraper
 	cloud        *providerScraper
 	retriabledns *retryabledns.Client
+	wafDetector  *WAFDetector
 }
 
 // New creates cdncheck client with default options
@@ -84,6 +85,7 @@ func NewWithOpts(MaxRetries int, resolvers []string) (*Client, error) {
 		waf:          newProviderScraper(generatedData.WAF),
 		cloud:        newProviderScraper(generatedData.Cloud),
 		retriabledns: retryabledns,
+		wafDetector:  NewWAFDetector(),
 	}
 	return client, nil
 }
@@ -189,6 +191,33 @@ func (c *Client) CheckDNSResponse(dnsResponse *retryabledns.DNSData) (matched bo
 
 func (c *Client) GetDnsData(domain string) (*retryabledns.DNSData, error) {
 	return c.retriabledns.Resolve(domain)
+}
+
+// CheckWAFHeaders checks if HTTP response headers match known WAF fingerprints.
+func (c *Client) CheckWAFHeaders(headers map[string][]string) (matched bool, provider string, err error) {
+	if c.wafDetector == nil {
+		c.wafDetector = NewWAFDetector()
+	}
+	matched, provider = c.wafDetector.MatchHeaders(headers)
+	return matched, provider, nil
+}
+
+// CheckWAFResponse checks if HTTP response headers or body match known WAF fingerprints.
+func (c *Client) CheckWAFResponse(headers map[string][]string, body []byte) (matched bool, provider string, err error) {
+	if c.wafDetector == nil {
+		c.wafDetector = NewWAFDetector()
+	}
+	matched, provider = c.wafDetector.Match(headers, body)
+	return matched, provider, nil
+}
+
+// CheckHeaders checks if response headers match known WAF or CDN fingerprints.
+func (c *Client) CheckHeaders(headers map[string][]string) (matched bool, provider string, itemType string, err error) {
+	matched, provider, err = c.CheckWAFHeaders(headers)
+	if err == nil && matched {
+		return true, provider, "waf", nil
+	}
+	return false, "", "", err
 }
 
 func mapKeys(m map[string][]string) string {
