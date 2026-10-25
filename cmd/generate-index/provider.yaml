@@ -128,7 +128,7 @@ cdn:
     - 49.229.94.0/24
     - 58.64.0.0/24
     - 58.64.11.0/24
-    百度云加速:
+    baidu:
     - 1.56.80.0/24
     - 1.71.157.0/24
     - 1.182.48.0/24
@@ -644,7 +644,7 @@ cdn:
     - 223.113.52.0/24
     - 223.113.140.0/24
     - 223.241.196.0/24
-    腾讯云:
+    tencent:
     - 1.56.98.0/24
     - 1.62.64.0/24
     - 1.71.146.0/24
@@ -1928,7 +1928,7 @@ cdn:
     - 223.166.255.0/24
     - 223.247.65.0/24
     - 223.247.117.0/24
-    加速乐:
+    jiasule:
     - 1.31.128.0/24
     - 1.255.41.0/24
     - 1.255.100.0/24
@@ -1981,7 +1981,7 @@ cdn:
     - 218.4.251.0/24
     - 218.22.46.0/24
     - 219.153.73.0/24
-    云盾:
+    yundun:
     - 27.221.64.0/24
     - 27.221.68.0/24
     - 42.236.6.128/27
@@ -2034,7 +2034,7 @@ cdn:
     - 206.119.109.192/26
     - 206.119.108.192/26
     - 216.177.129.0/24
-    阿里云:
+    aliyun:
     - 1.25.68.0/24
     - 1.27.242.0/24
     - 1.28.145.0/24
@@ -3637,7 +3637,7 @@ cdn:
     - 223.112.199.0/24
     - 223.144.131.0/24
     - 223.223.175.0/24
-    网宿:
+    wangsu:
     - 1.71.150.0/24
     - 1.180.19.0/24
     - 1.180.23.0/24
@@ -5567,7 +5567,7 @@ common:
     - impervadns.net
     qrator:
     - qrator.net
-    阿里云 CDN:
+    aliyun:
     - kunlunpi.com
     - alikunlun.com
     - kunlunea.com
@@ -5580,7 +5580,7 @@ common:
     - cdngslb.com
     - kunluncan.com
     - alicloudwaf.com
-    腾讯云 CDN:
+    tencent:
     - cdn.dnsv1.com
     - qcloudcjgj.com
     - qcloudwzgj.com
@@ -5590,7 +5590,7 @@ common:
     - dnsv1.com
     - tencdns.net
     - tdnsv5.com
-    网宿 CDN:
+    wangsu:
     - wsdvs.com
     - lxdns.com
     - wswebcdn.com
@@ -5610,77 +5610,77 @@ common:
     - 51cdn.com
     - speedcdns.com
     - wtxcdn.com
-    加速乐 CDN:
+    jiasule:
     - cname.365cyd.cn
     - cdn.jiashule.com
     - vip.jiasule.org
-    帝联 CDN:
+    dnion:
     - fastcdn.com
-    广东网堤 CDN:
+    wangdi:
     - 2cname.com
-    美橙 CDN:
+    cndns:
     - cndns5.com
     - 51hostonline.cn
     - websitecname.cn
-    又拍云 CDN:
+    upyun:
     - aicdn.com
-    白山云科技 CDN:
+    baishan:
     - bsgslb.cn
     - qingcdn.com
     - trpcdn.net
     - bsclink.cn
-    云盾 CDN:
+    yundun:
     - yunduncdn.com
-    360 云加速 CDN:
+    360-cdn:
     - qss-lb.com
     - qh-cdn.com
-    网神 CDN:
+    legendsec:
     - 360wzws.com
     - qaxwzws.com
     - qaxcloudwaf.com
-    安恒玄武盾:
+    dbappsecurity:
     - saaswaf.com
     - dbappwaf.cn
-    奇安信网站卫士:
+    qianxin:
     - 360cloudwaf.com
     - 360anyu.com
     - 360safedns.com
     - 360wzws.com
     - qaxwzws.com
-    深信服云盾:
+    sangfor:
     - sangfordns.com
-    绿盟云 WAF:
+    nsfocus:
     - nscloudwaf.com
-    华为云 WAF:
+    huawei-waf:
     - huaweicloudwaf.com
     - huaweicloud.com
-    华为云 CDN:
+    huawei:
     - cdnhwc1.com
     - cdnhwc2.com
     - cdnhwc3.com
-    360 云 CDN (由奇安信运营):
+    qianxin-360-cdn:
     - qhcdn.com
-    360 云 CDN (由奇虎 360 运营):
+    qihoo-360-cdn:
     - qihucdn.com
     - 60cdn.com
-    七牛云:
+    qiniu:
     - qbox.me
     - qiniu.com
     - iniudns.com
-    京东云 CDN:
+    jdcloud:
     - jcloud-cdn.com
     - jcloudlb.com
     - qianxun.com
     - jdcdn.com
     - jcloudcs.com
-    腾正安全加速 (原 15CDN):
+    15cdn:
     - 15cdn.com
     - tzcdn.cn
-    蓝盾云 CDN:
+    bluedon:
     - cloudfence.cn
     arvancloud:
     - arvancdn.ir
     - arvancloud.ir
     - arvancloud.ru
-    百度智能云 CDN:
+    baidu:
     - shifen.com
