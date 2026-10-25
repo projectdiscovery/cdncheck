@@ -46,6 +46,14 @@ func TestCheckWappalyzer(t *testing.T) {
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "sucuri", provider, "could not get correct provider")
 
+	valid, _, err = client.CheckWappalyzer(map[string]struct{}{"azure": {}})
+	require.Nil(t, err)
+	require.False(t, valid)
+
+	valid, _, err = client.CheckWappalyzer(map[string]struct{}{"google cloud": {}})
+	require.Nil(t, err)
+	require.False(t, valid)
+
 	valid, _, err = client.CheckWappalyzer(map[string]struct{}{"php": {}})
 	require.Nil(t, err, "could not check cname")
 	require.False(t, valid, "could get valid cname")

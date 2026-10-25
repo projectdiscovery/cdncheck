@@ -77,7 +77,6 @@ type Options struct {
 	OnResult           func(r Output)
 	MaxRetries         int
 	Threads            int
-	Concurrency        int
 }
 
 // configureOutput configures the output logging levels to be displayed on the screen
@@ -150,7 +149,6 @@ func readFlags() (*Options, error) {
 		flagSet.BoolVarP(&opts.Exclude, "exclude", "e", false, "exclude detected ip from output"),
 		flagSet.IntVar(&opts.MaxRetries, "retry", 2, "maximum number of retries for dns resolution (must be at least 1)"),
 		flagSet.IntVarP(&opts.Threads, "threads", "t", 50, "number of concurrent threads to use"),
-		flagSet.IntVarP(&opts.Concurrency, "concurrency", "c", 0, "number of concurrent threads to use"),
 	)
 
 	flagSet.CreateGroup("update", "UPDATE",
@@ -163,9 +161,6 @@ func readFlags() (*Options, error) {
 		os.Exit(0)
 	}
 
-	if opts.Concurrency > 0 {
-		opts.Threads = opts.Concurrency
-	}
 	if opts.Threads <= 0 {
 		opts.Threads = 50
 	}
