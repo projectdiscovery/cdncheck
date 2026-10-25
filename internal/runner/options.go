@@ -76,6 +76,7 @@ type Options struct {
 	Resolvers          goflags.StringSlice
 	OnResult           func(r Output)
 	MaxRetries         int
+	Threads            int
 }
 
 // configureOutput configures the output logging levels to be displayed on the screen
@@ -147,6 +148,7 @@ func readFlags() (*Options, error) {
 		flagSet.StringSliceVarP(&opts.Resolvers, "resolver", "r", nil, "list of resolvers to use (file or comma separated)", goflags.CommaSeparatedStringSliceOptions),
 		flagSet.BoolVarP(&opts.Exclude, "exclude", "e", false, "exclude detected ip from output"),
 		flagSet.IntVar(&opts.MaxRetries, "retry", 2, "maximum number of retries for dns resolution (must be at least 1)"),
+		flagSet.IntVarP(&opts.Threads, "threads", "t", 50, "number of concurrent threads to use"),
 	)
 
 	flagSet.CreateGroup("update", "UPDATE",
@@ -157,6 +159,10 @@ func readFlags() (*Options, error) {
 	if err := flagSet.Parse(); err != nil {
 		gologger.Fatal().Msgf("Could not parse flags: %s", err)
 		os.Exit(0)
+	}
+
+	if opts.Threads <= 0 {
+		opts.Threads = 50
 	}
 
 	// configure output option
