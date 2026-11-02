@@ -18,6 +18,16 @@ func TestCheckSuffix(t *testing.T) {
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "amazon", provider, "could not get correct provider")
 
+	valid, provider, _, err = client.CheckSuffix("app.f5edge.com")
+	require.Nil(t, err, "could not check f5 suffix")
+	require.True(t, valid, "could not get valid f5 suffix")
+	require.Equal(t, "f5", provider, "could not get correct provider")
+
+	valid, provider, _, err = client.CheckSuffix("app.volterra.io")
+	require.Nil(t, err, "could not check volterra suffix")
+	require.True(t, valid, "could not get valid volterra suffix")
+	require.Equal(t, "f5", provider, "could not get correct provider")
+
 	valid, _, _, err = client.CheckSuffix("test.provider.net")
 	require.Nil(t, err, "could not check cname")
 	require.False(t, valid, "could get valid cname")
@@ -45,6 +55,16 @@ func TestCheckWappalyzer(t *testing.T) {
 	require.Nil(t, err, "could not check wappalyzer")
 	require.True(t, valid, "could not get valid cname")
 	require.Equal(t, "sucuri", provider, "could not get correct provider")
+
+	valid, provider, err = client.CheckWappalyzer(map[string]struct{}{"f5 distributed cloud": {}})
+	require.Nil(t, err)
+	require.True(t, valid)
+	require.Equal(t, "f5", provider)
+
+	valid, provider, err = client.CheckWappalyzer(map[string]struct{}{"f5 big-ip application security manager": {}})
+	require.Nil(t, err)
+	require.True(t, valid)
+	require.Equal(t, "f5", provider)
 
 	valid, _, err = client.CheckWappalyzer(map[string]struct{}{"azure": {}})
 	require.Nil(t, err)

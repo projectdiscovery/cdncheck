@@ -34,6 +34,11 @@ var cdnWappalyzerTechnologies = map[string]string{
 	"arvancloud": "arvancloud",
 	"qrator":     "qrator",
 	"section.io": "section.io",
+	"f5 big-ip":                   "f5",
+	"f5 big-ip access policy manager": "f5",
+	"f5 big-ip local traffic manager": "f5",
+	"f5 big-ip application security manager": "f5",
+	"f5 distributed cloud":        "f5",
 }
 
 // CheckFQDN checks if fqdns are known cloud ones
