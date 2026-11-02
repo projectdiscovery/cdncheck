@@ -63,6 +63,7 @@ func TestCDNCheckValid(t *testing.T) {
 	require.Nil(t, err)
 	require.True(t, found, "could not match f5 cidr")
 	require.Equal(t, "f5", provider)
+	require.Contains(t, []string{"cdn", "waf"}, itemType)
 
 	// Baidu Cloud CDN
 	found, provider, itemType, err = client.Check(net.ParseIP("1.56.80.1"))
