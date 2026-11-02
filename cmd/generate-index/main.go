@@ -17,8 +17,9 @@ import (
 var (
 	input  = flag.String("input", "provider.yaml", "provider file for processing")
 	output = flag.String("output", "sources_data.json", "output file for generated sources")
-	token  = flag.String("token", "", "Token for the ipinfo service")
-	strict = flag.Bool("strict", true, "exit non-zero if any provider source failed (set to false to keep legacy lenient behaviour)")
+	token     = flag.String("token", "", "Token for the ipinfo service")
+	pdcpToken = flag.String("pdcp-key", "", "API key for the ProjectDiscovery Cloud Platform (asnmap) service")
+	strict    = flag.Bool("strict", true, "exit non-zero if any provider source failed (set to false to keep legacy lenient behaviour)")
 )
 
 func main() {
@@ -34,6 +35,9 @@ func process() error {
 	options.ParseFromEnv()
 	if *token != "" && options.IPInfoToken == "" {
 		options.IPInfoToken = *token
+	}
+	if *pdcpToken != "" && options.PDCPApiKey == "" {
+		options.PDCPApiKey = *pdcpToken
 	}
 
 	categories, err := parseCategoriesFromFile()

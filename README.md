@@ -137,6 +137,11 @@ New providers which can be scraped from a URL, ASN or a list of static CIDR can 
 - Push your changes to your forked repository on GitHub.
 - Open a pull request to the original repository with your changes.
 
+When compiling `sources_data.json` for ASN-based providers, you can use ProjectDiscovery's `asnmap` service via `-pdcp-key` (or `PDCP_API_KEY`/`PD_API_KEY` env variable), or the `ipinfo` service via `-token` (or `IPINFO_TOKEN` env variable):
+```bash
+go run ./cmd/generate-index -input cmd/generate-index/provider.yaml -output sources_data.json -pdcp-key $PDCP_API_KEY
+```
+
 
 ### Other providers
 

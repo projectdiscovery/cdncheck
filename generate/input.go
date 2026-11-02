@@ -2,19 +2,25 @@ package generate
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/netip"
 	"regexp"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/ipinfo/go/v2/ipinfo"
 	"github.com/projectdiscovery/cdncheck"
+	"github.com/projectdiscovery/mapcidr"
 	stringsutil "github.com/projectdiscovery/utils/strings"
 )
+
+var asnmapURL = "https://asn.projectdiscovery.io/api/v1/asn"
 
 var cidrRegex = regexp.MustCompile(`(([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/[0-9]{1,3})|(((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\/[0-9]{1,3}))`)
 
@@ -125,7 +131,13 @@ func (c *Category) fetchInputItem(options *Options, data map[string][]string) er
 	}
 	for provider, asn := range c.ASN {
 		for _, item := range asn {
-			cidrs, err := getIpInfoASN(http.DefaultClient, options.IPInfoToken, item)
+			var cidrs []string
+			var err error
+			if options.PDCPApiKey != "" {
+				cidrs, err = getASNMapASN(options.HTTPClient, options.PDCPApiKey, item)
+			} else if options.IPInfoToken != "" {
+				cidrs, err = getIpInfoASN(http.DefaultClient, options.IPInfoToken, item)
+			}
 			if err != nil {
 				log.Printf("[err] asn %s (%s): %s\n", provider, item, err)
 				errs = append(errs, fmt.Errorf("asn %s (%s): %w", provider, item, err))
@@ -138,6 +150,72 @@ func (c *Category) fetchInputItem(options *Options, data map[string][]string) er
 }
 
 var errNoCidrFound = errors.New("no cidrs found for url")
+
+
+// getASNMapASN returns cidrs for an ASN using ProjectDiscovery's asnmap service
+func getASNMapASN(httpClient *http.Client, pdcpKey string, asn string) ([]string, error) {
+	if pdcpKey == "" {
+		return nil, errors.New("pdcp auth token not specified")
+	}
+	cleanASN := strings.TrimPrefix(strings.ToLower(strings.TrimSpace(asn)), "as")
+	reqURL := fmt.Sprintf("%s?asn=%s", asnmapURL, cleanASN)
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("X-PDCP-Key", pdcpKey)
+	req.Header.Set("User-Agent", "cdncheck-generate-index")
+
+	client := httpClient
+	if client == nil {
+		client = http.DefaultClient
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New("unauthorized: invalid or missing PDCP API key")
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("asnmap returned status %s", resp.Status)
+	}
+
+	type ASNMapResponse struct {
+		FirstIP string `json:"first_ip"`
+		LastIP  string `json:"last_ip"`
+	}
+
+	var results []ASNMapResponse
+	if err := json.NewDecoder(resp.Body).Decode(&results); err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, errNoCidrFound
+	}
+
+	var cidrs []string
+	for _, res := range results {
+		first := net.ParseIP(res.FirstIP)
+		last := net.ParseIP(res.LastIP)
+		if first == nil || last == nil {
+			continue
+		}
+		ipnets, err := mapcidr.GetCIDRFromIPRange(first, last)
+		if err != nil {
+			continue
+		}
+		for _, ipnet := range ipnets {
+			cidrs = append(cidrs, ipnet.String())
+		}
+	}
+	if len(cidrs) == 0 {
+		return nil, errNoCidrFound
+	}
+	return cidrs, nil
+}
 
 // getIpInfoASN returns cidrs for an ASN from ipinfo using a token
 func getIpInfoASN(httpClient *http.Client, token string, asn string) ([]string, error) {

@@ -132,3 +132,72 @@ func equalStrings(a, b []string) bool {
 	}
 	return true
 }
+
+func TestFetchInputItem_ASNMapResolvesASN(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-PDCP-Key") != "test-pdcp-key" {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if r.URL.Query().Get("asn") != "13335" {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`[{"first_ip":"1.1.1.0","last_ip":"1.1.1.255","asn":13335,"org":"Cloudflare"}]`))
+	}))
+	defer srv.Close()
+
+	oldURL := asnmapURL
+	asnmapURL = srv.URL
+	defer func() { asnmapURL = oldURL }()
+
+	cat := &Category{
+		ASN: map[string][]string{
+			"cloudflare": {"AS13335"},
+		},
+	}
+	opts := &Options{
+		PDCPApiKey: "test-pdcp-key",
+		HTTPClient: srv.Client(),
+	}
+	data := map[string][]string{}
+	if err := cat.fetchInputItem(opts, data); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := data["cloudflare"]
+	want := []string{"1.1.1.0/24"}
+	if !equalStrings(got, want) {
+		t.Fatalf("asnmap cidrs = %v, want %v", got, want)
+	}
+}
+
+func TestFetchInputItem_ASNMapUnauthorized(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+	}))
+	defer srv.Close()
+
+	oldURL := asnmapURL
+	asnmapURL = srv.URL
+	defer func() { asnmapURL = oldURL }()
+
+	cat := &Category{
+		ASN: map[string][]string{
+			"cloudflare": {"AS13335"},
+		},
+	}
+	opts := &Options{
+		PDCPApiKey: "invalid-key",
+		HTTPClient: srv.Client(),
+	}
+	data := map[string][]string{}
+	err := cat.fetchInputItem(opts, data)
+	if err == nil {
+		t.Fatalf("expected error for unauthorized asnmap request")
+	}
+	if !strings.Contains(err.Error(), "unauthorized") {
+		t.Fatalf("expected unauthorized error, got %v", err)
+	}
+}
