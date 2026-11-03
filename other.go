@@ -52,16 +52,22 @@ func (c *Client) CheckSuffix(fqdns ...string) (isCDN bool, provider string, item
 		}
 	})
 	for _, fqdn := range fqdns {
-		parsed, err := publicsuffix.Parse(fqdn)
-		if err != nil {
+		if _, err := publicsuffix.Parse(fqdn); err != nil {
 			return false, "", "", errors.Wrap(err, "could not parse fqdn")
 		}
-		if discovered, ok := suffixToSource[parsed.TLD]; ok {
-			return true, discovered, "waf", nil
-		}
-		domain := parsed.SLD + "." + parsed.TLD
-		if discovered, ok := suffixToSource[domain]; ok {
-			return true, discovered, "waf", nil
+		// check the fqdn and every parent domain: known suffixes can sit
+		// below a public suffix (x.map.fastly.net) or span more than two
+		// labels (x.cname.365cyd.cn)
+		name := strings.ToLower(fqdn)
+		for {
+			if discovered, ok := suffixToSource[name]; ok {
+				return true, discovered, "waf", nil
+			}
+			idx := strings.Index(name, ".")
+			if idx == -1 {
+				break
+			}
+			name = name[idx+1:]
 		}
 	}
 	return false, "", "", nil
