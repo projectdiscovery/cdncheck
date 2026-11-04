@@ -31,6 +31,25 @@ func TestCheckSuffix(t *testing.T) {
 	valid, _, _, err = client.CheckSuffix("test.provider.net")
 	require.Nil(t, err, "could not check cname")
 	require.False(t, valid, "could get valid cname")
+
+	// Nested public suffixes and multi-label known suffixes (fixes #544)
+	testCases := []struct {
+		fqdn     string
+		provider string
+	}{
+		{"dualstack.example.map.fastly.net", "fastly"},
+		{"my-lb-123.us-east-1.elb.amazonaws.com", "amazon"},
+		{"example.cname.365cyd.cn", "jiasule"},
+		{"example.vip.jiasule.org", "jiasule"},
+	}
+
+	for _, tc := range testCases {
+		matched, prov, itemType, err := client.CheckSuffix(tc.fqdn)
+		require.NoError(t, err, "failed checking suffix for %s", tc.fqdn)
+		require.True(t, matched, "expected %s to match provider %s", tc.fqdn, tc.provider)
+		require.Equal(t, tc.provider, prov, "wrong provider for %s", tc.fqdn)
+		require.Equal(t, "waf", itemType)
+	}
 }
 
 func TestCheckWappalyzer(t *testing.T) {
