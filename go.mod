@@ -10,12 +10,12 @@ require (
 	github.com/miekg/dns v1.1.73
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/goflags v0.2.1
-	github.com/projectdiscovery/gologger v1.1.75
+	github.com/projectdiscovery/gologger v1.1.76
 	github.com/projectdiscovery/mapcidr v1.1.97
-	github.com/projectdiscovery/retryabledns v1.0.118
-	github.com/projectdiscovery/utils v0.11.13
+	github.com/projectdiscovery/retryabledns v1.0.119
+	github.com/projectdiscovery/utils v0.11.14
 	github.com/stretchr/testify v1.12.1
-	github.com/weppos/publicsuffix-go v0.50.4-0.20260821095816-b0fdb5c2d345
+	github.com/weppos/publicsuffix-go v0.50.4-0.20260918082853-3c3d7dc4a0cb
 	gopkg.in/yaml.v3 v3.0.1
 )
 
