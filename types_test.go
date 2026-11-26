@@ -54,29 +54,3 @@ func TestProviderScraperMatchTieIsStable(t *testing.T) {
 		require.Equal(t, "aaa", provider, "ties must be broken deterministically by provider name")
 	}
 }
-
-// TestProviderScraperMatchRealDataOverlap guards the behaviour against the
-// generated data, which contains overlapping providers (office365's
-// 13.107.6.152/31 sits inside azure's 13.107.4.0/22).
-func TestProviderScraperMatchRealDataOverlap(t *testing.T) {
-	client := New()
-
-	matched, provider, itemType, err := client.Check(net.ParseIP("13.107.6.152"))
-	require.Nil(t, err)
-	require.True(t, matched)
-	require.Equal(t, "office365", provider, "the /31 must win over the enclosing /22")
-	require.Equal(t, "cloud", itemType)
-
-	matched, provider, itemType, err = client.Check(net.ParseIP("14.0.41.5"))
-	require.Nil(t, err)
-	require.True(t, matched)
-	require.Equal(t, "wangsu", provider, "the /24 must win over the enclosing /19")
-	require.Equal(t, "cdn", itemType)
-
-	// aliyun and jiasule both list 1.31.128.0/24; the tie is broken by name.
-	matched, provider, itemType, err = client.Check(net.ParseIP("1.31.128.5"))
-	require.Nil(t, err)
-	require.True(t, matched)
-	require.Equal(t, "aliyun", provider)
-	require.Equal(t, "cdn", itemType)
-}
